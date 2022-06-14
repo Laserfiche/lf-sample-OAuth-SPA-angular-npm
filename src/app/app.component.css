@@ -1,0 +1,43 @@
+.lf-component-container {
+  max-height: 500px;
+  max-width: 750px;
+  overflow: auto;
+  outline: auto;
+  margin: 25px;
+  padding: 20px;
+  padding-bottom: 30px;
+}
+
+.lf-folder-browser-sample-container {
+  height: calc(100% - 18px); /* this is so there isn't an extra scroll bar */
+}
+
+.folder-browse-select {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.lf-multivalue-remove-button {
+  background-color: inherit;
+  border: none;
+  padding: 0;
+  margin-right: 1px;
+  margin-left: 2px;
+  margin-top: 4px;
+}
+svg#close {
+  fill: rgb(170, 170, 170);
+  opacity: 0.6;
+}
+
+:enabled svg#close:hover {
+  opacity: 1;
+}
+.file_input_no_show {
+  display: none;
+}
+
+.lf-right-button {
+  display: flex;
+  justify-content: flex-end;
+}
