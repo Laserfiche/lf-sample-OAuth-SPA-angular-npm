@@ -27,12 +27,12 @@ We welcome contributions and feedback. Please follow our [contributing guideline
 
 ## First Time Setup
 
-1. Create a new Single Page App in [devconsole](https://app.a.clouddev.laserfiche.com/devconsole/apps) and add the authentication redirect URI (e.g.: <https://myapp.example.com/lf-sample-app/>) which is also the root page of this app.
+1. Create a new Single Page App in [devconsole](https://app.laserfiche.com/devconsole/apps) and add the authentication redirect URI (e.g.: <https://myapp.example.com/lf-sample-app/>) which is also the root page of this app.
 2. Open folder (containing package.json) with Visual Studio Code
 3. Update the `<lf-login>` in `src/app/app.component.html` with the app client_id and redirect_uri as registered in step 1.
 4. In VS Code, open a New Terminal window.
 5. Run `npm install` in root folder. This command installs dependencies packages.
-6. Run `ng build` in root folder. This command builds the project into `dist/` directory.
+6. Run `ng build` in root folder. This command builds the project into `dist/` directory. See below for suggestions on how to host this folder.
 
 ## Build
 
@@ -46,6 +46,16 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 - It is recommended to configure IIS website to use HTTPS and disable HTTP
 - Browse to <https://myapp.example.com/lf-sample-app/> and sign-in
 
-## Running unit tests
+## Things to verify before creating a Pull Request
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+### Run tests
+
+```sh
+npm run test
+```
+
+### Run lint
+
+```sh
+npm run lint
+```

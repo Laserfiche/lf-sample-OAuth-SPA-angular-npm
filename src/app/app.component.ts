@@ -69,8 +69,6 @@ export class AppComponent implements AfterViewInit {
 
   // Angular hook, after view is initiated
   async ngAfterViewInit(): Promise<void> {
-    // need to initialize the localization service to use it later
-
     await this.getAndInitializeRepositoryClientAndServicesAsync();
   }
 
