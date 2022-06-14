@@ -8,6 +8,11 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Laserfiche/lf-sample-OAuth-SPA-angular"
+  },
   "private": true,
   "dependencies": {
     "@angular/animations": "^12.1.0",

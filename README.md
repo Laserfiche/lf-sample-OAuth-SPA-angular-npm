@@ -15,6 +15,10 @@ This project depends on the following libraries
 - From JSDelivr (via NPM)
   - [`<script src="https://cdn.jsdelivr.net/npm/@laserfiche/lf-ui-components@12.0.0/cdn/lf-ui-components.js" defer></script>`](https://cdn.jsdelivr.net/npm/@laserfiche/lf-ui-components@12.0.0/cdn/lf-ui-components.js)
 
+## Contribution
+
+We welcome contributions and feedback. Please follow our [contributing guidelines](./CONTRIBUTING.md).
+
 ## Pre-Requisites
 
 - Visual Studio Code
