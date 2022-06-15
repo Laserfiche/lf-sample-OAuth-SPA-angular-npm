@@ -54,9 +54,3 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 ```sh
 npm run test
 ```
-
-### Run lint
-
-```sh
-npm run lint
-```
