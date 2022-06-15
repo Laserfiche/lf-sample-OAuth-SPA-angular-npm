@@ -32,6 +32,10 @@ interface IRepositoryApiClientExInternal extends IRepositoryApiClientEx {
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements AfterViewInit {
+  REDIRECT_URI: string = 'REPLACE_WITH_YOUR_REDIRECT_URI'; // i.e http://localhost:3000, https://serverName/lf-sample/index.html
+  CLIENT_ID: string = 'REPLACE_WITH_YOUR_CLIENT_ID';
+  HOST_NAME: string = ''; // if you are using cloud Production leave this blank
+
   // repository client that will be used to connect to the LF API
   private repoClient?: IRepositoryApiClientExInternal;
 
@@ -100,6 +104,42 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
+  private afterFetchResponseAsync = async (url, response, request) => {
+    if (response.status === 401) {
+      // this will initialize the login flow if refresh is unsuccessful
+      const refresh = await this.loginComponent.nativeElement.refreshTokenAsync(true);
+      if (refresh) {
+        request.headers['Authorization'] = 'Bearer ' + this.loginComponent.nativeElement.authorization_credentials.accessToken;
+        return true;
+      }
+      else {
+        this.repoClient.clearCurrentRepo();
+        return false;
+      }
+    }
+    return false;
+  }
+
+  private beforeFetchRequestAsync = async (url, request) => {
+    // need to get accessToken each time
+    const accessToken = this.loginComponent.nativeElement.authorization_credentials.accessToken;
+    if (accessToken) {
+      request.headers['Authorization'] = 'Bearer ' + accessToken;
+      return { regionalDomain: 'a.clouddev.laserfiche.com' }
+    }
+    else {
+      throw new Error('Access Token undefined.');
+    }
+  };
+
+  private getCurrentRepo = async () => {
+    const repos = await this.repoClient.repositoriesClient.getRepositoryList({});
+    const repo = repos[0];
+    if (repo.repoId && repo.repoName) {
+      return { repoId: repo.repoId, repoName: repo.repoName };
+    }
+    throw new Error('Current repoId undefined.')
+  };
 
   async ensureRepoClientInitializedAsync(): Promise<void> {
 
@@ -107,41 +147,10 @@ export class AppComponent implements AfterViewInit {
       const partialRepoClient: IRepositoryApiClient =
         RepositoryApiClient.createFromHttpRequestHandler(
           {
-            beforeFetchRequestAsync: async (url, request) => {
-              // need to get accessToken each time
-              const accessToken = this.loginComponent.nativeElement.authorization_credentials.accessToken;
-              if (accessToken) {
-                request.headers['Authorization'] = 'Bearer ' + accessToken;
-                return { regionalDomain: 'a.clouddev.laserfiche.com' }
-              }
-              else {
-                throw new Error('Access Token undefined.');
-              }
-            },
-            afterFetchResponseAsync: async (url, response, request) => {
-              if (response.status === 401) {
-                // this will initialize the login flow if refresh is unsuccessful
-                const refresh = await this.loginComponent.nativeElement.refreshTokenAsync(true);
-                if (refresh) {
-                  request.headers['Authorization'] = 'Bearer ' + this.loginComponent.nativeElement.authorization_credentials.accessToken;
-                  return true;
-                }
-                else {
-                  this.repoClient.clearCurrentRepo();
-                  return false;
-                }
-              }
-              return false;
-            }
+            beforeFetchRequestAsync: this.beforeFetchRequestAsync,
+            afterFetchResponseAsync: this.afterFetchResponseAsync
           });
-      const getCurrentRepo = async () => {
-        const repos = await partialRepoClient.repositoriesClient.getRepositoryList({});
-        const repo = repos[0];
-        if (repo.repoId && repo.repoName) {
-          return { repoId: repo.repoId, repoName: repo.repoName };
-        }
-        throw new Error('Current repoId undefined.')
-      };
+      
       const clearCurrentRepo = () => {
         this.repoClient._repoId = undefined;
         this.repoClient._repoName = undefined;
@@ -158,7 +167,7 @@ export class AppComponent implements AfterViewInit {
           }
           else {
             console.log('getting id from api')
-            const repo = (await getCurrentRepo()).repoId;
+            const repo = (await this.getCurrentRepo()).repoId;
             this.repoClient._repoId = repo;
             return repo;
           }
@@ -168,7 +177,7 @@ export class AppComponent implements AfterViewInit {
             return this.repoClient._repoName;
           }
           else {
-            const repo = (await getCurrentRepo()).repoName;
+            const repo = (await this.getCurrentRepo()).repoName;
             this.repoClient._repoName = repo;
             return repo;
           }
