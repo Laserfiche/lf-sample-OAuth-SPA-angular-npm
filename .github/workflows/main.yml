@@ -28,6 +28,9 @@ jobs:
         run: npm install -g npm@8
 
       - name: Npm install
+        run: ls
+
+      - name: Npm install
         run: npm install
 
       - name: npm run build
