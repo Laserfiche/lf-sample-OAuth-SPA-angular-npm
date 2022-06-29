@@ -25,8 +25,8 @@
     "@angular/platform-browser-dynamic": "^12.1.0",
     "@angular/router": "^12.1.0",
     "@laserfiche/lf-js-utils": "^3.0.5",
-    "@laserfiche/lf-repository-api-client": "^1.0.3--preview-2489888364",
-    "@laserfiche/lf-ui-components-services": "^3.0.0--preview-2490257584",
+    "@laserfiche/lf-repository-api-client": "^1.0.6",
+    "@laserfiche/lf-ui-components-services": "^3.0.0",
     "rxjs": "^6.6.0",
     "tslib": "^2.2.0",
     "zone.js": "^0.11.4"
