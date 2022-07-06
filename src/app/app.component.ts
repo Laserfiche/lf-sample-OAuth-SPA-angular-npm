@@ -2,8 +2,11 @@ import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, ViewChild } fr
 import { PostEntryWithEdocMetadataRequest, FileParameter, RepositoryApiClient, IRepositoryApiClient, PutFieldValsRequest, IPutFieldValsRequest, FieldToUpdate, ValueToUpdate } from '@laserfiche/lf-repository-api-client';
 import { LfFolder, LfFieldsService, LfRepoTreeService, LfRepoTreeEntryType, IRepositoryApiClientEx } from '@laserfiche/lf-ui-components-services';
 import { LfLocalizationService, PathUtils } from '@laserfiche/lf-js-utils';
-import { LfFieldContainerComponent, LfFolderBrowserComponent, LfLoginComponent, LoginState, TreeNode } from '@laserfiche/types-lf-ui-components';
+import { LfLoginComponent } from '@laserfiche/lf-ui-components/lf-login';
+import { LfFieldContainerComponent } from '@laserfiche/lf-ui-components/lf-metadata';
+import { LfFolderBrowserComponent, TreeNode } from '@laserfiche/lf-ui-components/tree-components'
 import { getEntryWebAccessUrl } from './lf-url-utils';
+import { LoginState } from '@laserfiche/lf-ui-components/shared';
 
 const resources: Map<string, object> = new Map<string, object>([
   ['en', {
