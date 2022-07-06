@@ -34,7 +34,7 @@ interface IRepositoryApiClientExInternal extends IRepositoryApiClientEx {
 export class AppComponent implements AfterViewInit {
   REDIRECT_URI: string = 'REPLACE_WITH_YOUR_REDIRECT_URI'; // i.e http://localhost:3000, https://serverName/lf-sample/index.html
   CLIENT_ID: string = 'REPLACE_WITH_YOUR_CLIENT_ID';
-  HOST_NAME: string = ''; // only add this if you are using a different region or environment (i.e. laserfiche.ca, eu.laserfiche.com)
+  HOST_NAME: string = 'laserfiche.com'; // only update this if you are using a different region or environment (i.e. laserfiche.ca, eu.laserfiche.com)
   REGIONAL_DOMAIN: string = 'laserfiche.com' // only update this if you are using a different region or environment
 
   // repository client that will be used to connect to the LF API
@@ -151,7 +151,7 @@ export class AppComponent implements AfterViewInit {
             beforeFetchRequestAsync: this.beforeFetchRequestAsync,
             afterFetchResponseAsync: this.afterFetchResponseAsync
           });
-      
+
       const clearCurrentRepo = () => {
         this.repoClient._repoId = undefined;
         this.repoClient._repoName = undefined;
