@@ -27,6 +27,7 @@
     "@laserfiche/lf-js-utils": "^4.0.2",
     "@laserfiche/lf-repository-api-client": "^1.0.6",
     "@laserfiche/lf-ui-components-services": "^3.0.1",
+    "@laserfiche/lf-ui-components": "13.0.0--preview-2630978749",
     "rxjs": "^6.6.0",
     "tslib": "^2.3.1",
     "zone.js": "^0.11.4"
