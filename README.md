@@ -4,7 +4,8 @@ This app showcases the use of the [Laserfiche UI Components library](https://dev
 
 This application uses the `<lf-login>` UI component to initiate an OAuth2 flow to authenticate the user. SPA OAuth2 applications must first be registered in the Laserfiche account devconsole as SPA.
 
-This particular application is built using Angular, but Laserfiche UI Components are framework-agnostic and support other frameworks such as React.js, Vue, and no-framework HTML5.
+This particular application is built using Angular and uses the npm package `@laserfiche/lf-ui-components`, which can only be used in an Angular project. If you would like to see examples of how to use the Laserfiche UI Components in any framework (Angular, Vue, React, no-framework, etc.), please see our other sample projects in [Angular](https://github.com/Laserfiche/lf-sample-OAuth-SPA-angular-cdn) and [React](https://github.com/Laserfiche/lf-sample-OAuth-SPA-react).
+
 
 This project depends on the following libraries
 
@@ -12,7 +13,6 @@ This project depends on the following libraries
   - [@laserfiche/lf-js-utils](https://www.npmjs.com/package/@laserfiche/lf-js-utils)
   - [@laserfiche/lf-ui-components-services](https://www.npmjs.com/package/@laserfiche/lf-ui-components-services)
   - [@laserfiche/lf-ui-components](https://www.npmjs.com/package/@laserfiche/lf-ui-components)
-- From JSDelivr (via NPM)
 
 ## Contribution
 
