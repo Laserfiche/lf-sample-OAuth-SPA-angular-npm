@@ -11,9 +11,7 @@ This project depends on the following libraries
 - From NPM:
   - [@laserfiche/lf-js-utils](https://www.npmjs.com/package/@laserfiche/lf-js-utils)
   - [@laserfiche/lf-ui-components-services](https://www.npmjs.com/package/@laserfiche/lf-ui-components-services)
-  - [@laserfiche/types-lf-ui-components](https://www.npmjs.com/package/@laserfiche/types-lf-ui-components)
-- From JSDelivr (via NPM)
-  - [`<script src="https://cdn.jsdelivr.net/npm/@laserfiche/lf-ui-components@12.0.0/cdn/lf-ui-components.js" defer></script>`](https://cdn.jsdelivr.net/npm/@laserfiche/lf-ui-components@12.0.0/cdn/lf-ui-components.js)
+  - [@laserfiche/lf-ui-components](https://www.npmjs.com/package/@laserfiche/lf-ui-components)
 
 ## Contribution
 
