@@ -9,7 +9,7 @@ import { getEntryWebAccessUrl } from './lf-url-utils';
 import { LoginState } from '@laserfiche/lf-ui-components/shared';
 
 const resources: Map<string, object> = new Map<string, object>([
-  ['en', {
+  ['en-US', {
     'FOLDER_BROWSER_PLACEHOLDER': 'No folder selected',
     'SAVE_TO_LASERFICHE': 'Save to Laserfiche',
     'CLICK_TO_UPLOAD': 'Click to upload file',
