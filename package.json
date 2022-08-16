@@ -24,7 +24,7 @@
     "@angular/platform-browser": "^13.3.11",
     "@angular/platform-browser-dynamic": "^13.3.11",
     "@angular/router": "^13.3.11",
-    "@laserfiche/lf-js-utils": "^4.0.2",
+    "@laserfiche/lf-js-utils": "^4.0.3",
     "@laserfiche/lf-repository-api-client": "^1.0.6",
     "@laserfiche/lf-ui-components": "^13.0.0",
     "@laserfiche/lf-ui-components-services": "^3.0.1",
@@ -33,8 +33,8 @@
     "zone.js": "^0.11.4"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^13.3.8",
-    "@angular/cli": "^13.3.8",
+    "@angular-devkit/build-angular": "^13.3.9",
+    "@angular/cli": "^13.3.9",
     "@angular/compiler-cli": "^13.3.11",
     "@types/jasmine": "^3.8.0",
     "@types/node": "^12.11.1",
