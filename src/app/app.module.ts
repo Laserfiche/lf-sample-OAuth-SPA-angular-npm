@@ -5,6 +5,7 @@ import { LfLoginModule } from '@laserfiche/lf-ui-components/lf-login';
 import { TreeComponentsModule } from '@laserfiche/lf-ui-components/tree-components';
 import { LfMetadataModule } from '@laserfiche/lf-ui-components/lf-metadata';
 import { AppComponent } from './app.component';
+import { LfRepositoryBrowserModule } from '@laserfiche/lf-ui-components/lf-repository-browser';
 
 @NgModule({
   declarations: [
@@ -15,6 +16,7 @@ import { AppComponent } from './app.component';
     FormsModule,
     LfLoginModule,
     TreeComponentsModule,
+    LfRepositoryBrowserModule,
     LfMetadataModule,
   ],
   bootstrap: [AppComponent],
