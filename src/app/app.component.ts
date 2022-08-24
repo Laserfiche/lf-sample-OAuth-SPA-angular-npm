@@ -56,7 +56,6 @@ export class AppComponent implements AfterViewInit {
   @ViewChild('lfFieldContainerElement') lfFieldContainerElement?: ElementRef<LfFieldContainerComponent>;
   @ViewChild('loginComponent') loginComponent?: ElementRef<LfLoginComponent>;
   @ViewChild('lfRepositoryBrowser') lfRepositoryBrowser?: ElementRef<LfRepositoryBrowserComponent>;
-  @ViewChild('repoBrowser') repoBrowser?: ElementRef<LfRepositoryBrowserComponent>;
 
   // services needed for UI components
   lfFieldsService?: LfFieldsService;
@@ -168,16 +167,16 @@ export class AppComponent implements AfterViewInit {
         _repoId: undefined,
         _repoName: undefined,
         getCurrentRepoId: async () => {
-          // if (this.repoClient._repoId) {
-          //   console.log('getting id from cache')
-          //   return this.repoClient._repoId
-          // }
-          // else {
+          if (this.repoClient._repoId) {
+            console.log('getting id from cache')
+            return this.repoClient._repoId
+          }
+          else {
             console.log('getting id from api')
             const repo = (await this.getCurrentRepo()).repoId;
             this.repoClient._repoId = repo;
             return repo;
-          // }
+          }
         },
         getCurrentRepoName: async () => {
           if (this.repoClient._repoName) {
@@ -203,7 +202,6 @@ export class AppComponent implements AfterViewInit {
     this.ref.detectChanges();
 
     await this.lfRepositoryBrowser?.nativeElement.initAsync(this.lfRepoTreeNodeService);
-    // await this.lfRepositoryBrowser?.nativeElement.initAsync(this.dataService);
   }
 
   get isLoggedIn(): boolean {
