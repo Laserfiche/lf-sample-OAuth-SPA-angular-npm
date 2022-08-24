@@ -1,13 +1,12 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
-import { PostEntryWithEdocMetadataRequest, FileParameter, RepositoryApiClient, IRepositoryApiClient, PutFieldValsRequest, IPutFieldValsRequest, FieldToUpdate, ValueToUpdate, Entry } from '@laserfiche/lf-repository-api-client';
-import { LfFolder, LfFieldsService, LfRepoTreeEntryType, IRepositoryApiClientEx, LfRepoTreeNodeService } from '@laserfiche/lf-ui-components-services';
-import { IconUtils, LfLocalizationService, PathUtils } from '@laserfiche/lf-js-utils';
+import { PostEntryWithEdocMetadataRequest, FileParameter, RepositoryApiClient, IRepositoryApiClient, PutFieldValsRequest, FieldToUpdate, ValueToUpdate, Entry } from '@laserfiche/lf-repository-api-client';
+import { LfFolder, LfFieldsService, LfRepoTreeEntryType, LfRepoTreeNodeService, IRepositoryApiClientEx } from '@laserfiche/lf-ui-components-services';
+import { LfLocalizationService, PathUtils } from '@laserfiche/lf-js-utils';
 import { LfLoginComponent } from '@laserfiche/lf-ui-components/lf-login';
 import { LfFieldContainerComponent } from '@laserfiche/lf-ui-components/lf-metadata';
-import { getEntryWebAccessUrl } from './lf-url-utils';
 import { LoginState } from '@laserfiche/lf-ui-components/shared';
 import { LfRepositoryBrowserComponent } from '@laserfiche/lf-ui-components/lf-repository-browser';
-import { LfTreeNode } from '@laserfiche/types-lf-ui-components';
+import { getEntryWebAccessUrl } from './lf-url-utils';
 
 const resources: Map<string, object> = new Map<string, object>([
   ['en-US', {
@@ -212,29 +211,24 @@ export class AppComponent implements AfterViewInit {
   }
 
   // Tree event handler methods
-  async onOkClick(okClickEvent: Event) {
-    const selectedNode = (okClickEvent as CustomEvent<LfTreeNode[]>).detail;
-    if (selectedNode.length > 0) {
-      console.debug("oon ok click")
+  async onSelectFolder() {
+    const selectedNode = this.lfRepositoryBrowser.nativeElement.currentFolder;
+
 
       const breadcrumbs = this.lfRepositoryBrowser?.nativeElement?.breadcrumbs;
-      const entryId = Number.parseInt(selectedNode[0].id, 10);
-      const path = selectedNode[0].path;
+      const entryId = Number.parseInt(selectedNode.id, 10);
+      const path = selectedNode.path;
       this.selectedFolder = {
         entryId,
         path,
         displayName: this.getFolderNameText(entryId, path),
         displayPath: this.getFolderPathTooltip(path)
       };
-      // if (breadcrumbs) {
-      //   this.lfRepositoryBrowser.nativeElement.breadcrumbs = breadcrumbs;
-      // }
-      const nodeId = selectedNode[0].id;
+      const nodeId = selectedNode.id;
       const repoId = (await this.repoClient.getCurrentRepoId());
       const waUrl = this.loginComponent.nativeElement.account_endpoints.webClientUrl;
-      this.selectedNodeUrl = getEntryWebAccessUrl(nodeId, repoId, waUrl, selectedNode[0].isContainer);
+      this.selectedNodeUrl = getEntryWebAccessUrl(nodeId, repoId, waUrl, selectedNode.isContainer);
       this.expandFolderBrowser = false;
-    }
   }
 
   async onClickBrowse() {

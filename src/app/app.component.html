@@ -33,16 +33,13 @@
     <a class="open-in-lf-link" *ngIf="selectedNodeUrl" href="{{selectedNodeUrl}}" target="_blank"
       rel="noopener noreferrer">{{OPEN_IN_LASERFICHE}}</a>
     <div *ngIf="expandFolderBrowser" class="lf-folder-browser-sample-container">
-      <!-- <lf-folder-browser #lfFolderBrowserElement (okClick)="onOkClick($event)"
-        (cancelClick)="onFolderBrowserCancelClick()" ok_button_text={{SELECT}} cancel_button_text={{CANCEL}}>
-      </lf-folder-browser> -->
       <lf-repository-browser #lfRepositoryBrowser
       multiple="false"
-      style="height: 500px"
+      style="height: 450px"
     ></lf-repository-browser>
     </div>
+    <button class="lf-button primary-button" (click)="onSelectFolder()">{{SELECT}}</button>
   </div>
-
   <div class="lf-component-container">
     <lf-field-container #lfFieldContainerElement [collapsible]="true" [startCollapsed]="true"
       (dialogOpened)="adhocDialogOpened()" (dialogClosed)="adhocDialogClosed()">
