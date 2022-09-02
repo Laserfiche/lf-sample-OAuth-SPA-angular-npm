@@ -25,10 +25,9 @@
     "@angular/platform-browser-dynamic": "^13.3.11",
     "@angular/router": "^13.3.11",
     "@laserfiche/lf-js-utils": "^4.0.3",
-    "@laserfiche/lf-repository-api-client": "^1.0.6",
-    "@laserfiche/lf-ui-components": "^13.1.0--preview-2920922867",
-    "@laserfiche/lf-ui-components-services": "^13.0.0--preview-2921715643",
-    "@laserfiche/types-lf-ui-components": "^13.1.0--preview-2920922867",
+    "@laserfiche/lf-repository-api-client": "^1.0.10--preview-2",
+    "@laserfiche/lf-ui-components": "^13.1.1",
+    "@laserfiche/lf-ui-components-services": "^13.0.0--preview-2981394600",
     "rxjs": "^6.6.0",
     "tslib": "^2.3.1",
     "zone.js": "^0.11.4"

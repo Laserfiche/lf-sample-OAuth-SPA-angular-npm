@@ -36,9 +36,12 @@
       <lf-repository-browser #lfRepositoryBrowser
       multiple="false"
       style="height: 450px"
+      [isSelectable]="isNodeSelectable"
+      (entrySelected)="onEntrySelected($event)"
     ></lf-repository-browser>
+    <button class="lf-button primary-button"*ngIf="shouldShowOpen" (click)="onOpenNode()">Open</button>
+    <button class="lf-button primary-button" *ngIf="shouldShowSelect" (click)="onSelectFolder()">{{SELECT}}</button>
     </div>
-    <button class="lf-button primary-button" (click)="onSelectFolder()">{{SELECT}}</button>
   </div>
   <div class="lf-component-container">
     <lf-field-container #lfFieldContainerElement [collapsible]="true" [startCollapsed]="true"
