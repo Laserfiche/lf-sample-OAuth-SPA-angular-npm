@@ -250,8 +250,11 @@ export class AppComponent implements AfterViewInit {
 
 
       const breadcrumbs = this.lfRepositoryBrowser?.nativeElement?.breadcrumbs;
-      const entryId = Number.parseInt(selectedNode.id, 10);
+      let entryId = Number.parseInt(selectedNode.id, 10);
       const path = selectedNode.path;
+      if (selectedNode.entryType == EntryType.Shortcut) {
+        entryId = selectedNode.targetId;
+      }
       this.selectedFolder = {
         entryId,
         path,
