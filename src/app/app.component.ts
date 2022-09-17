@@ -29,14 +29,6 @@ interface IRepositoryApiClientExInternal extends IRepositoryApiClientEx {
   _repoName?: string;
 }
 
-interface LfFolder {
-  path: string;
-  entryId: number | undefined;
-  breadcrumbs?: LfRepoTreeNode[];
-  displayName?: string;
-  displayPath?: string;
-}
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -55,8 +47,9 @@ export class AppComponent implements AfterViewInit {
   selectedNodeUrl?: string;
 
   // the folder the user has selected in the folder-browser
-  selectedFolder?: LfFolder;
-
+  selectedFolderPath: string;
+  selectedFolderId: number;
+  selectedFolderName: string;
   // used to get the file user is trying to save
   @ViewChild('fileInput') fileInput: ElementRef<HTMLInputElement>;
 
@@ -207,26 +200,14 @@ export class AppComponent implements AfterViewInit {
 
   async initializeTreeAsync() {
     this.ref.detectChanges();
-    let defaultNode = {
-      id: '168158',
-      isContainer: true,
-      isLeaf: false,
-      path: '\\Ke\\test\\new folder test',
-      name: 'new folder test',
-      icon: ''
-    };
     let focusedNode;
-    if (this.selectedFolder) {
-      focusedNode = {
-        id: this.selectedFolder.entryId,
-        isContainer: true,
-        isLeaf: false,
-        path: this.selectedFolder.path,
-        name: this.selectedFolder.displayName,
-        icon: ''
-      }
-    } else {
-      focusedNode = defaultNode;
+    if (this.selectedFolderPath) {
+      let repoId = await this.repoClient.getCurrentRepoId();
+      let focusNodeByPath = await this.repoClient.entriesClient.getEntryByPath({
+          repoId: repoId,
+          fullPath: this.selectedFolderPath
+        });
+      focusedNode = focusNodeByPath.entry;
     }
     await this.lfRepositoryBrowser?.nativeElement.initAsync(this.lfRepoTreeNodeService, focusedNode);
   }
@@ -241,31 +222,25 @@ export class AppComponent implements AfterViewInit {
   }
 
   get isLoggedIn(): boolean {
+    console.log('here', this.loginComponent?.nativeElement?.state)
     return this.loginComponent?.nativeElement?.state === LoginState.LoggedIn;
   }
 
   // Tree event handler methods
   async onSelectFolder() {
     const selectedNode = this.lfRepositoryBrowser.nativeElement.currentFolder as LfRepoTreeNode;
-
-
-      const breadcrumbs = this.lfRepositoryBrowser?.nativeElement?.breadcrumbs;
-      let entryId = Number.parseInt(selectedNode.id, 10);
-      const path = selectedNode.path;
-      if (selectedNode.entryType == EntryType.Shortcut) {
-        entryId = selectedNode.targetId;
-      }
-      this.selectedFolder = {
-        entryId,
-        path,
-        displayName: this.getFolderNameText(entryId, path),
-        displayPath: this.getFolderPathTooltip(path)
-      };
-      const nodeId = selectedNode.id;
-      const repoId = (await this.repoClient.getCurrentRepoId());
-      const waUrl = this.loginComponent.nativeElement.account_endpoints.webClientUrl;
-      this.selectedNodeUrl = getEntryWebAccessUrl(nodeId, repoId, waUrl, selectedNode.isContainer);
-      this.expandFolderBrowser = false;
+    let entryId = Number.parseInt(selectedNode.id, 10);
+    this.selectedFolderPath = selectedNode.path;
+    if (selectedNode.entryType == EntryType.Shortcut) {
+      entryId = selectedNode.targetId;
+    }
+    this.selectedFolderId = entryId;
+    this.selectedFolderName = this.getFolderNameText(entryId, this.selectedFolderPath);
+    const nodeId = selectedNode.id;
+    const repoId = (await this.repoClient.getCurrentRepoId());
+    const waUrl = this.loginComponent.nativeElement.account_endpoints.webClientUrl;
+    this.selectedNodeUrl = getEntryWebAccessUrl(nodeId, repoId, waUrl, selectedNode.isContainer);
+    this.expandFolderBrowser = false;
   }
 
   get shouldShowSelect(): boolean {
@@ -279,12 +254,11 @@ export class AppComponent implements AfterViewInit {
   onEntrySelected(event) {
     const customEvent = event as CustomEvent<LfTreeNode[]>;
     const treeNodesSelected: LfTreeNode[] = customEvent.detail;
-    this.entrySelected = treeNodesSelected?.length>0 ? treeNodesSelected[0] : undefined;
+    this.entrySelected = treeNodesSelected?.length > 0 ? treeNodesSelected[0] : undefined;
   }
 
   async onOpenNode() {
-    const nodeToOpen = this.entrySelected;
-    await this.lfRepositoryBrowser?.nativeElement?.openChildFolderAsync(nodeToOpen);
+    await this.lfRepositoryBrowser?.nativeElement?.openSelectedNodesAsync();
   }
 
   async onClickBrowse() {
@@ -292,15 +266,16 @@ export class AppComponent implements AfterViewInit {
     await this.initializeTreeAsync();
   }
 
-  private getFolderPathTooltip(path: string): string {
-    const FOLDER_BROWSER_PLACEHOLDER = this.localizationService.getString('FOLDER_BROWSER_PLACEHOLDER');
-    return path ? PathUtils.createDisplayPath(path) : FOLDER_BROWSER_PLACEHOLDER;
-  }
-
   get selectedFolderDisplayName(): string {
     const FOLDER_BROWSER_PLACEHOLDER = this.localizationService.getString('FOLDER_BROWSER_PLACEHOLDER');
-    return this.selectedFolder?.displayName ?? FOLDER_BROWSER_PLACEHOLDER;
+    return this.selectedFolderName ?? FOLDER_BROWSER_PLACEHOLDER;
   }
+
+  set selectedFolderDisplayName(folderName: string) {
+    const FOLDER_BROWSER_PLACEHOLDER = this.localizationService.getString('FOLDER_BROWSER_PLACEHOLDER');
+    this.selectedFolderName = folderName ?? FOLDER_BROWSER_PLACEHOLDER;
+  }
+
   private getFolderNameText(entryId: number, path: string): string {
     if (path) {
       const displayPath: string = path;
@@ -362,7 +337,7 @@ export class AppComponent implements AfterViewInit {
 
   get enableSave(): boolean {
     const fileSelected: boolean = !!this.fileSelected;
-    const folderSelected: boolean = !!this.selectedFolder;
+    const folderSelected: boolean = !!this.selectedFolderId;
 
     return fileSelected && folderSelected;
   }
@@ -372,7 +347,7 @@ export class AppComponent implements AfterViewInit {
     if (valid) {
       const fileNameWithExtension = this.fileName + '.' + this.fileExtension;
       const edocBlob: FileParameter = { data: (this.fileSelected as Blob), fileName: fileNameWithExtension };
-      const parentEntryId = this.selectedFolder.entryId;
+      const parentEntryId = this.selectedFolderId;
 
       const metadataRequest = await this.createMetadataRequestAsync();
       const entryRequest: PostEntryWithEdocMetadataRequest = new PostEntryWithEdocMetadataRequest({
