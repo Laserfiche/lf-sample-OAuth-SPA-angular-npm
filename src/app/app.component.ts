@@ -207,9 +207,18 @@ export class AppComponent implements AfterViewInit {
           repoId: repoId,
           fullPath: this.selectedFolderPath
         });
-      focusedNode = focusNodeByPath.entry;
+        const focusedNodeEntry = focusNodeByPath?.entry;
+        if (focusedNodeEntry) {
+          focusedNode = {
+            id: focusedNodeEntry.id.toString(),
+            isContainer: focusedNodeEntry.isContainer,
+            isLeaf: focusedNodeEntry.isLeaf,
+            path: this.selectedFolderPath,
+            name: focusedNodeEntry.name,
+          };
+        }
     }
-    await this.lfRepositoryBrowser?.nativeElement.initAsync(this.lfRepoTreeNodeService, focusedNode);
+    await this.lfRepositoryBrowser?.nativeElement.initAsync(this.lfRepoTreeNodeService, focusedNode as LfRepoTreeNode);
   }
 
   isNodeSelectable = (node: LfRepoTreeNode) => {
