@@ -48,7 +48,6 @@ export class AppComponent implements AfterViewInit {
 
   // the folder the user has selected in the folder-browser
   selectedFolderPath: string;
-  selectedFolderId: number;
   selectedFolderName: string;
   // used to get the file user is trying to save
   @ViewChild('fileInput') fileInput: ElementRef<HTMLInputElement>;
@@ -241,12 +240,10 @@ export class AppComponent implements AfterViewInit {
     if (selectedNode.entryType == EntryType.Shortcut) {
       entryId = selectedNode.targetId;
     }
-    this.selectedFolderId = entryId;
     this.selectedFolderName = this.getFolderNameText(entryId, this.selectedFolderPath);
-    const nodeId = selectedNode.id;
     const repoId = (await this.repoClient.getCurrentRepoId());
     const waUrl = this.loginComponent.nativeElement.account_endpoints.webClientUrl;
-    this.selectedNodeUrl = getEntryWebAccessUrl(nodeId, repoId, waUrl, selectedNode.isContainer);
+    this.selectedNodeUrl = getEntryWebAccessUrl(entryId.toString(), repoId, waUrl, selectedNode.isContainer);
     this.expandFolderBrowser = false;
   }
 
@@ -344,7 +341,7 @@ export class AppComponent implements AfterViewInit {
 
   get enableSave(): boolean {
     const fileSelected: boolean = !!this.fileSelected;
-    const folderSelected: boolean = !!this.selectedFolderId;
+    const folderSelected: boolean = !!this.selectedFolderPath;
 
     return fileSelected && folderSelected;
   }
@@ -354,7 +351,6 @@ export class AppComponent implements AfterViewInit {
     if (valid) {
       const fileNameWithExtension = this.fileName + '.' + this.fileExtension;
       const edocBlob: FileParameter = { data: (this.fileSelected as Blob), fileName: fileNameWithExtension };
-      const parentEntryId = this.selectedFolderId;
 
       const metadataRequest = await this.createMetadataRequestAsync();
       const entryRequest: PostEntryWithEdocMetadataRequest = new PostEntryWithEdocMetadataRequest({
@@ -364,6 +360,11 @@ export class AppComponent implements AfterViewInit {
 
       try {
         const repoId = await this.repoClient.getCurrentRepoId();
+        const currentSelectedEntry = await this.repoClient.entriesClient.getEntryByPath({
+          repoId,
+          fullPath: this.selectedFolderPath
+        });
+        const parentEntryId = currentSelectedEntry.entry?.id;
         await this.repoClient.entriesClient.importDocument({
           repoId,
           parentEntryId,
