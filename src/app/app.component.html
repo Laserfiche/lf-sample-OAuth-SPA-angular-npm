@@ -30,7 +30,7 @@
       {{SELECTED_FOLDER}}{{selectedFolderDisplayName}}
       <button [hidden]="expandFolderBrowser" class="lf-button primary-button" (click)="onClickBrowse()">{{BROWSE}}</button>
     </div>
-    <a class="open-in-lf-link" *ngIf="selectedNodeUrl" href="{{selectedNodeUrl}}" target="_blank"
+    <a class="open-in-lf-link" *ngIf="lfSelectedFolder" href="{{lfSelectedFolder.selectedNodeUrl}}" target="_blank"
       rel="noopener noreferrer">{{OPEN_IN_LASERFICHE}}</a>
     <div *ngIf="expandFolderBrowser" class="lf-folder-browser-sample-container">
       <lf-repository-browser #lfRepositoryBrowser
