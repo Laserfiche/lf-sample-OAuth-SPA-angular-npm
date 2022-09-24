@@ -51,16 +51,11 @@ export class AppComponent implements AfterViewInit {
   // used to get the file user is trying to save
   @ViewChild('fileInput') fileInput: ElementRef<HTMLInputElement>;
 
-  lfSelectedFolder: ILfSelectedFolder;
+  lfSelectedFolder: ILfSelectedFolder | undefined;
   lfFieldContainerElement: ElementRef<LfFieldContainerComponent>;
 
   // the UI components
-  @ViewChild('lfFieldContainerElement')  set lfFieldContainerContent(lfFieldContainerRef: ElementRef<LfFieldContainerComponent>) {
-    if (lfFieldContainerRef) {
-      this.lfFieldContainerElement = lfFieldContainerRef;
-      this.initializeFieldContainerAsync(); // TODO: cannot await this
-    }
-  };
+  @ViewChild('lfFieldContainerElement') lfFieldContainerRef: ElementRef<LfFieldContainerComponent>;
   @ViewChild('loginComponent') loginComponent?: ElementRef<LfLoginComponent>;
   @ViewChild('lfRepositoryBrowser') lfRepositoryBrowser?: ElementRef<LfRepositoryBrowserComponent>;
 
@@ -87,10 +82,12 @@ export class AppComponent implements AfterViewInit {
   // Angular hook, after view is initiated
   async ngAfterViewInit(): Promise<void> {
     await this.getAndInitializeRepositoryClientAndServicesAsync();
+    await this.initializeFieldContainerAsync();
   }
 
   async onLoginCompletedAsync() {
     await this.getAndInitializeRepositoryClientAndServicesAsync();
+    await this.initializeFieldContainerAsync();
   }
 
   onLogoutCompleted() {
@@ -211,6 +208,7 @@ export class AppComponent implements AfterViewInit {
           repoId: repoId,
           fullPath: this.lfSelectedFolder.selectedFolderPath
         });
+        const repoName = await this.repoClient.getCurrentRepoName();
         const focusedNodeEntry = focusNodeByPath?.entry;
         if (focusedNodeEntry) {
           focusedNode = {
@@ -218,7 +216,7 @@ export class AppComponent implements AfterViewInit {
             isContainer: focusedNodeEntry.isContainer,
             isLeaf: focusedNodeEntry.isLeaf,
             path: this.lfSelectedFolder.selectedFolderPath,
-            name: focusedNodeEntry.name,
+            name: focusedNodeEntry.id == 1 ? repoName: focusedNodeEntry.name,
           };
         }
     }
@@ -284,10 +282,6 @@ export class AppComponent implements AfterViewInit {
     return this.lfSelectedFolder?.selectedFolderName ?? FOLDER_BROWSER_PLACEHOLDER;
   }
 
-  set selectedFolderDisplayName(folderName: string) {
-    const FOLDER_BROWSER_PLACEHOLDER = this.localizationService.getString('FOLDER_BROWSER_PLACEHOLDER');
-    this.lfSelectedFolder.selectedFolderName = folderName ?? FOLDER_BROWSER_PLACEHOLDER;
-  }
 
   private getFolderNameText(entryId: number, path: string): string {
     if (path) {
