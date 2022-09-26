@@ -105,7 +105,7 @@ export class AppComponent implements AfterViewInit {
       // create the tree service to interact with the LF Api
       this.lfRepoTreeNodeService = new LfRepoTreeNodeService(this.repoClient);
       // by default all entries are viewable
-      this.lfRepoTreeNodeService.viewableEntryTypes = [EntryType.Folder, EntryType.Shortcut, EntryType.Document];
+      this.lfRepoTreeNodeService.viewableEntryTypes = [EntryType.Folder, EntryType.Shortcut];
 
       // create the fields service to let the field component interact with Laserfiche
       this.lfFieldsService = new LfFieldsService(this.repoClient);
@@ -220,6 +220,14 @@ export class AppComponent implements AfterViewInit {
           path: this.lfSelectedFolder.selectedFolderPath,
           name: focusedNodeEntry.id == 1 ? repoName : focusedNodeEntry.name,
         };
+        if (focusedNodeEntry.entryType == EntryType.Shortcut) {
+          const focusedNodeEntryShortcut = focusedNodeEntry as Shortcut;
+          focusedNode.id = focusedNodeEntryShortcut.targetId;
+          if (focusedNodeEntryShortcut.targetType == EntryType.Folder) {
+            focusedNode.isContainer = true;
+            focusedNode.isLeaf = false;
+          }
+        }
       }
     }
     await this.lfRepositoryBrowser?.nativeElement.initAsync(this.lfRepoTreeNodeService, focusedNode as LfRepoTreeNode);
