@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { PostEntryWithEdocMetadataRequest, FileParameter, RepositoryApiClient, IRepositoryApiClient, PutFieldValsRequest, FieldToUpdate, ValueToUpdate, Entry, EntryType, Shortcut } from '@laserfiche/lf-repository-api-client';
 import { LfFieldsService, LfRepoTreeNodeService, IRepositoryApiClientEx, LfRepoTreeNode } from '@laserfiche/lf-ui-components-services';
 import { LfLocalizationService, PathUtils } from '@laserfiche/lf-js-utils';
@@ -55,7 +55,7 @@ export class AppComponent implements AfterViewInit {
   lfFieldContainerElement: ElementRef<LfFieldContainerComponent>;
 
   // the UI components
-  @ViewChild('lfFieldContainerElement') lfFieldContainerRef: ElementRef<LfFieldContainerComponent>;
+  @ViewChildren('lfFieldContainerElement') public lfFieldContainerQueryList: QueryList<ElementRef<LfFieldContainerComponent>>;
   @ViewChild('loginComponent') loginComponent?: ElementRef<LfLoginComponent>;
   @ViewChild('lfRepositoryBrowser') lfRepositoryBrowser?: ElementRef<LfRepositoryBrowserComponent>;
 
@@ -82,7 +82,10 @@ export class AppComponent implements AfterViewInit {
   // Angular hook, after view is initiated
   async ngAfterViewInit(): Promise<void> {
     await this.getAndInitializeRepositoryClientAndServicesAsync();
-    await this.initializeFieldContainerAsync();
+    this.lfFieldContainerQueryList.changes.subscribe(async (comps: QueryList<ElementRef<LfFieldContainerComponent>>) => {
+        this.lfFieldContainerElement = comps.first;
+        await this.lfFieldContainerElement?.nativeElement.initAsync(this.lfFieldsService);
+    })
   }
 
   async onLoginCompletedAsync() {
@@ -395,7 +398,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   private async createMetadataRequestAsync(): Promise<PostEntryWithEdocMetadataRequest> {
-    const fieldValues = this.lfFieldContainerElement?.nativeElement.getFieldValues() ?? {};
+    const fieldValues = this.lfFieldContainerElement?.nativeElement?.getFieldValues() ?? {};
     const templateName = this.lfFieldContainerElement?.nativeElement?.getTemplateValue()?.name ?? '';
 
     const formattedFieldValues: {
