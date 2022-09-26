@@ -44,7 +44,6 @@ export class AppComponent implements AfterViewInit {
   REDIRECT_URI: string = 'REPLACE_WITH_YOUR_REDIRECT_URI'; // i.e http://localhost:3000, https://serverName/lf-sample/index.html
   CLIENT_ID: string = 'REPLACE_WITH_YOUR_CLIENT_ID';
   HOST_NAME: string = 'laserfiche.com'; // only update this if you are using a different region or environment (i.e. laserfiche.ca, eu.laserfiche.com)
-  REGIONAL_DOMAIN: string = 'laserfiche.com'; // only update this if you are using a different region or environment
 
   // repository client that will be used to connect to the LF API
   private repoClient?: IRepositoryApiClientExInternal;
@@ -83,9 +82,9 @@ export class AppComponent implements AfterViewInit {
   async ngAfterViewInit(): Promise<void> {
     await this.getAndInitializeRepositoryClientAndServicesAsync();
     this.lfFieldContainerQueryList.changes.subscribe(async (comps: QueryList<ElementRef<LfFieldContainerComponent>>) => {
-        this.lfFieldContainerElement = comps.first;
-        await this.lfFieldContainerElement?.nativeElement.initAsync(this.lfFieldsService);
-    })
+      this.lfFieldContainerElement = comps.first;
+      await this.lfFieldContainerElement?.nativeElement.initAsync(this.lfFieldsService);
+    });
   }
 
   async onLoginCompletedAsync() {
@@ -137,7 +136,7 @@ export class AppComponent implements AfterViewInit {
     const accessToken = this.loginComponent.nativeElement.authorization_credentials.accessToken;
     if (accessToken) {
       request.headers['Authorization'] = 'Bearer ' + accessToken;
-      return { regionalDomain: this.REGIONAL_DOMAIN }; // update this if you want CA, EU, dev
+      return { regionalDomain: this.HOST_NAME }; // update this if you want CA, EU, dev
     }
     else {
       throw new Error('Access Token undefined.');
@@ -208,26 +207,29 @@ export class AppComponent implements AfterViewInit {
     if (this.lfSelectedFolder) {
       const repoId = await this.repoClient.getCurrentRepoId();
       const focusNodeByPath = await this.repoClient.entriesClient.getEntryByPath({
-          repoId: repoId,
-          fullPath: this.lfSelectedFolder.selectedFolderPath
-        });
-        const repoName = await this.repoClient.getCurrentRepoName();
-        const focusedNodeEntry = focusNodeByPath?.entry;
-        if (focusedNodeEntry) {
-          focusedNode = {
-            id: focusedNodeEntry.id.toString(),
-            isContainer: focusedNodeEntry.isContainer,
-            isLeaf: focusedNodeEntry.isLeaf,
-            path: this.lfSelectedFolder.selectedFolderPath,
-            name: focusedNodeEntry.id == 1 ? repoName: focusedNodeEntry.name,
-          };
-        }
+        repoId: repoId,
+        fullPath: this.lfSelectedFolder.selectedFolderPath
+      });
+      const repoName = await this.repoClient.getCurrentRepoName();
+      const focusedNodeEntry = focusNodeByPath?.entry;
+      if (focusedNodeEntry) {
+        focusedNode = {
+          id: focusedNodeEntry.id.toString(),
+          isContainer: focusedNodeEntry.isContainer,
+          isLeaf: focusedNodeEntry.isLeaf,
+          path: this.lfSelectedFolder.selectedFolderPath,
+          name: focusedNodeEntry.id == 1 ? repoName : focusedNodeEntry.name,
+        };
+      }
     }
     await this.lfRepositoryBrowser?.nativeElement.initAsync(this.lfRepoTreeNodeService, focusedNode as LfRepoTreeNode);
   }
 
   isNodeSelectable = (node: LfRepoTreeNode) => {
     if (node.entryType == EntryType.Folder) {
+      return true;
+    }
+    else if (node.entryType == EntryType.Shortcut && node.targetType == EntryType.Folder) {
       return true;
     }
     else {
@@ -254,7 +256,7 @@ export class AppComponent implements AfterViewInit {
       selectedNodeUrl: getEntryWebAccessUrl(entryId.toString(), repoId, waUrl, selectedNode.isContainer),
       selectedFolderName: this.getFolderNameText(entryId, selectedFolderPath),
       selectedFolderPath: selectedFolderPath
-    }
+    };
   }
 
   get shouldShowSelect(): boolean {
@@ -370,9 +372,9 @@ export class AppComponent implements AfterViewInit {
           repoId,
           fullPath: this.lfSelectedFolder.selectedFolderPath
         });
-        let currentSelectedEntry = currentSelectedByPathResponse.entry;
+        const currentSelectedEntry = currentSelectedByPathResponse.entry;
         let parentEntryId = currentSelectedEntry.id;
-        if ( currentSelectedEntry?.entryType == EntryType.Shortcut) {
+        if (currentSelectedEntry?.entryType == EntryType.Shortcut) {
           parentEntryId = (currentSelectedEntry as Shortcut).targetId;
         }
         await this.repoClient.entriesClient.importDocument({
