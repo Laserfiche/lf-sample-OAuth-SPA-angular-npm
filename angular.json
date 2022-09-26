@@ -55,7 +55,8 @@
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.prod.ts"
                 }
-              ]
+              ],
+              "sourceMap": true
             },
             "development": {
               "buildOptimizer": false,
@@ -101,9 +102,21 @@
             ],
             "scripts": []
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
+          }
         }
       }
     }
   },
-  "defaultProject": "laserfiche-sample-app"
+  "defaultProject": "laserfiche-sample-app",
+  "cli": {
+    "defaultCollection": "@angular-eslint/schematics"
+  }
 }
