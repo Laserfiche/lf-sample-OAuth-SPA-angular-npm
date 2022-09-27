@@ -85,7 +85,6 @@ export class AppComponent implements AfterViewInit {
       this.lfFieldContainerElement = comps.first;
       await this.lfFieldContainerElement?.nativeElement.initAsync(this.lfFieldsService);
     });
-    console.log(this.loginComponent.nativeElement.state)
   }
 
   async onLoginCompletedAsync() {
