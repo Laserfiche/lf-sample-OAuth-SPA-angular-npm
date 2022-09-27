@@ -203,7 +203,7 @@ export class AppComponent implements AfterViewInit {
 
   async initializeTreeAsync() {
     this.ref.detectChanges();
-    let focusedNode;
+    let focusedNode: LfRepoTreeNode | undefined;
     if (this.lfSelectedFolder) {
       const repoId = await this.repoClient.getCurrentRepoId();
       const focusNodeByPath = await this.repoClient.entriesClient.getEntryByPath({
@@ -213,22 +213,10 @@ export class AppComponent implements AfterViewInit {
       const repoName = await this.repoClient.getCurrentRepoName();
       const focusedNodeEntry = focusNodeByPath?.entry;
       if (focusedNodeEntry) {
-        focusedNode = {
-          id: this.getIdOrTargetId(focusedNodeEntry).toString(),
-          isContainer: focusedNodeEntry.isContainer,
-          isLeaf: focusedNodeEntry.isLeaf,
-          path: this.lfSelectedFolder.selectedFolderPath,
-          name: focusedNodeEntry.id == 1 ? repoName : focusedNodeEntry.name,
-        };
-        if (focusedNodeEntry.entryType == EntryType.Shortcut) {
-          if ((focusedNodeEntry as Shortcut).targetType == EntryType.Folder) {
-            focusedNode.isContainer = true;
-            focusedNode.isLeaf = false;
-          }
-        }
+        focusedNode = this.lfRepoTreeNodeService.createLfRepoTreeNode(focusedNodeEntry, repoName);
       }
     }
-    await this.lfRepositoryBrowser?.nativeElement.initAsync(this.lfRepoTreeNodeService, focusedNode as LfRepoTreeNode);
+    await this.lfRepositoryBrowser?.nativeElement.initAsync(this.lfRepoTreeNodeService, focusedNode);
   }
 
   isNodeSelectable = (node: LfRepoTreeNode) => {
