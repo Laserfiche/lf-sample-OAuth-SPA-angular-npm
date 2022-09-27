@@ -90,7 +90,6 @@ export class AppComponent implements AfterViewInit {
   async onLoginCompletedAsync() {
     await this.getAndInitializeRepositoryClientAndServicesAsync();
     await this.initializeFieldContainerAsync();
-    console.log('login complete')
   }
 
   onLogoutCompleted() {
