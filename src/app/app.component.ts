@@ -85,11 +85,13 @@ export class AppComponent implements AfterViewInit {
       this.lfFieldContainerElement = comps.first;
       await this.lfFieldContainerElement?.nativeElement.initAsync(this.lfFieldsService);
     });
+    console.log(this.loginComponent.nativeElement.state)
   }
 
   async onLoginCompletedAsync() {
     await this.getAndInitializeRepositoryClientAndServicesAsync();
     await this.initializeFieldContainerAsync();
+    console.log('login complete')
   }
 
   onLogoutCompleted() {
@@ -214,16 +216,14 @@ export class AppComponent implements AfterViewInit {
       const focusedNodeEntry = focusNodeByPath?.entry;
       if (focusedNodeEntry) {
         focusedNode = {
-          id: focusedNodeEntry.id.toString(),
+          id: this.getIdOrTargetId(focusedNodeEntry).toString(),
           isContainer: focusedNodeEntry.isContainer,
           isLeaf: focusedNodeEntry.isLeaf,
           path: this.lfSelectedFolder.selectedFolderPath,
           name: focusedNodeEntry.id == 1 ? repoName : focusedNodeEntry.name,
         };
         if (focusedNodeEntry.entryType == EntryType.Shortcut) {
-          const focusedNodeEntryShortcut = focusedNodeEntry as Shortcut;
-          focusedNode.id = focusedNodeEntryShortcut.targetId;
-          if (focusedNodeEntryShortcut.targetType == EntryType.Folder) {
+          if ((focusedNodeEntry as Shortcut).targetType == EntryType.Folder) {
             focusedNode.isContainer = true;
             focusedNode.isLeaf = false;
           }
@@ -381,10 +381,7 @@ export class AppComponent implements AfterViewInit {
           fullPath: this.lfSelectedFolder.selectedFolderPath
         });
         const currentSelectedEntry = currentSelectedByPathResponse.entry;
-        let parentEntryId = currentSelectedEntry.id;
-        if (currentSelectedEntry?.entryType == EntryType.Shortcut) {
-          parentEntryId = (currentSelectedEntry as Shortcut).targetId;
-        }
+        const parentEntryId = this.getIdOrTargetId(currentSelectedEntry);
         await this.repoClient.entriesClient.importDocument({
           repoId,
           parentEntryId,
@@ -438,6 +435,13 @@ export class AppComponent implements AfterViewInit {
     return entryRequest;
   }
 
+  private getIdOrTargetId(node: Entry): number {
+    if (node.entryType == EntryType.Shortcut) {
+      const shortcut = node as Shortcut;
+      return shortcut.targetId;
+    }
+    return node.id;
+  }
   // localization helpers
 
   BROWSE = this.localizationService.getString('BROWSE');
