@@ -367,7 +367,11 @@ export class AppComponent implements AfterViewInit {
           fullPath: this.lfSelectedFolder.selectedFolderPath
         });
         const currentSelectedEntry = currentSelectedByPathResponse.entry;
-        const parentEntryId = this.getIdOrTargetId(currentSelectedEntry);
+        let parentEntryId = currentSelectedEntry.id;
+        if (currentSelectedEntry.entryType == EntryType.Shortcut) {
+          const shortcut = currentSelectedEntry as Shortcut;
+          parentEntryId = shortcut.targetId;
+        }
         await this.repoClient.entriesClient.importDocument({
           repoId,
           parentEntryId,
@@ -421,13 +425,6 @@ export class AppComponent implements AfterViewInit {
     return entryRequest;
   }
 
-  private getIdOrTargetId(node: Entry): number {
-    if (node.entryType == EntryType.Shortcut) {
-      const shortcut = node as Shortcut;
-      return shortcut.targetId;
-    }
-    return node.id;
-  }
   // localization helpers
 
   BROWSE = this.localizationService.getString('BROWSE');
