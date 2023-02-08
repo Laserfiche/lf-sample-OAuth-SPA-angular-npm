@@ -30,7 +30,7 @@ We welcome contributions and feedback. Please follow our [contributing guideline
 2. Open folder (containing package.json) with Visual Studio Code
 3. In `src/app/app.component.ts` update the REDIRECT_URI and CLIENT_ID with the app client_id and redirect_uri as registered in step 1. You only need to update HOST_NAME if you are not using cloud production (laserfiche.com).
 4. Update the REGIONAL_DOMAIN if you need are using a different environment (i.e. laserfiche.ca).
-5. You can also specify which scope(s) you'd like for the authorization request using SCOPE. Scopes are case-sensitive and space-delimited (i.e. repository.Read). Scopes are optional when using v1 APIs but mandatory in v2. 
+5. You can also specify which scope(s) you'd like for the authorization request using SCOPE. Scopes are case-sensitive and space-delimited (i.e. repository.Read). Scopes are optional when using v1 APIs but mandatory in v2. This sample app requires a "repository.Read" scope.
 6. In VS Code, open a New Terminal window.
 7. Run `npm install` in root folder. This command installs dependencies packages.
 8. Run `ng build` in root folder. This command builds the project into `dist/` directory. See below for suggestions on how to host this folder.
