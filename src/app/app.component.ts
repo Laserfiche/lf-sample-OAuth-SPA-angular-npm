@@ -43,7 +43,8 @@ interface ILfSelectedFolder {
 export class AppComponent implements AfterViewInit {
   REDIRECT_URI: string = 'REPLACE_WITH_YOUR_REDIRECT_URI'; // i.e http://localhost:3000, https://serverName/lf-sample/index.html
   CLIENT_ID: string = 'REPLACE_WITH_YOUR_CLIENT_ID';
-  HOST_NAME: string = 'laserfiche.com'; // only update this if you are using a different region or environment (i.e. laserfiche.ca, eu.laserfiche.com)
+  HOST_NAME: string = 'laserfiche.com'; // only update this if you are using a different environment (i.e. a.clouddev.laserfiche.com)
+  SCOPE: string = 'repository.Read repository.Write'; // Scope(s) requested by the app
 
   // repository client that will be used to connect to the LF API
   private repoClient?: IRepositoryApiClientExInternal;
