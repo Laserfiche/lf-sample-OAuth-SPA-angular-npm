@@ -6,6 +6,7 @@ import { LfLoginComponent } from '@laserfiche/lf-ui-components/lf-login';
 import { LfFieldContainerComponent } from '@laserfiche/lf-ui-components/lf-metadata';
 import { LoginState } from '@laserfiche/lf-ui-components/shared';
 import { LfRepositoryBrowserComponent, LfTreeNode } from '@laserfiche/lf-ui-components/lf-repository-browser';
+import { ColumnDef } from '@laserfiche/lf-ui-components/lf-selection-list';
 import { getEntryWebAccessUrl } from './lf-url-utils';
 
 const resources: Map<string, object> = new Map<string, object>([
@@ -41,9 +42,9 @@ interface ILfSelectedFolder {
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements AfterViewInit {
-  REDIRECT_URI: string = 'REPLACE_WITH_YOUR_REDIRECT_URI'; // i.e http://localhost:3000, https://serverName/lf-sample/index.html
-  CLIENT_ID: string = 'REPLACE_WITH_YOUR_CLIENT_ID';
-  HOST_NAME: string = 'laserfiche.com'; // only update this if you are using a different environment (i.e. a.clouddev.laserfiche.com)
+  REDIRECT_URI: string = 'https://canyonville.laserfiche.com/npm-sample-spa'; // i.e http://localhost:3000, https://serverName/lf-sample/index.html
+  CLIENT_ID: string = '6bd54321-2737-4a42-985d-abac41375af5';
+  HOST_NAME: string = 'a.clouddev.laserfiche.com'; // only update this if you are using a different environment (i.e. a.clouddev.laserfiche.com)
   SCOPE: string = 'repository.Read repository.Write'; // Scope(s) requested by the app
 
   // repository client that will be used to connect to the LF API
@@ -86,6 +87,36 @@ export class AppComponent implements AfterViewInit {
       this.lfFieldContainerElement = comps.first;
       await this.lfFieldContainerElement?.nativeElement.initAsync(this.lfFieldsService);
     });
+  }
+
+  setFakeColumns() {
+    let columns: ColumnDef[] = [
+      {
+        id: 'name',
+        displayName: 'Name',
+        defaultWidth: 'auto',
+        minWidthPx: 100,
+        resizable: true,
+        sortable: true,
+      },
+      {
+        id: 'creationTime',
+        displayName: 'Creation Time',
+        defaultWidth: 'auto',
+        minWidthPx: 100,
+        resizable: true,
+        sortable: true,
+      },
+      {
+        id: 'creator',
+        displayName: 'Author',
+        defaultWidth: 'auto',
+        minWidthPx: 100,
+        resizable: true,
+        sortable: true,
+      }
+    ];
+    this.lfRepositoryBrowser?.nativeElement.setColumnsToDisplay(columns);
   }
 
   async onLoginCompletedAsync() {
@@ -274,7 +305,9 @@ export class AppComponent implements AfterViewInit {
 
   async onClickBrowse() {
     this.expandFolderBrowser = true;
+    this.lfRepoTreeNodeService.columnIds = ['creationTime', 'lastModifiedTime', 'pageCount', 'templateName', 'creator'];
     await this.initializeTreeAsync();
+    this.setFakeColumns();
   }
 
   get selectedFolderDisplayName(): string {
