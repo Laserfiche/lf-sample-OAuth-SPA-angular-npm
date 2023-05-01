@@ -95,7 +95,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   setFakeColumns() {
-    let columns: ColumnDef[] = [
+    const columns: ColumnDef[] = [
       {
         id: 'name',
         displayName: 'Name',
