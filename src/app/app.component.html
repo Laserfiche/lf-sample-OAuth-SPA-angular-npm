@@ -39,6 +39,10 @@
       [isSelectable]="isNodeSelectable"
       (entrySelected)="onEntrySelected($event)"
     ></lf-repository-browser>
+    <lf-toolbar [dropdown_options]="toolbarOptions" (optionSelected)="onToolbarOptionSelected($event)" class="lfToolBar"></lf-toolbar>
+    <div *ngIf="shouldShowModal">
+      <app-new-folder-modal (shouldCloseModal)="closeModal()" (folderEmitter)="makeNewFolder($event)"></app-new-folder-modal>
+    </div>
     <button class="lf-button primary-button"*ngIf="shouldShowOpen" (click)="onOpenNode()">Open</button>
     <button class="lf-button primary-button" *ngIf="shouldShowSelect" (click)="onSelectFolder()">{{SELECT}}</button>
     </div>

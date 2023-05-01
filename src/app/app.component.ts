@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { PostEntryWithEdocMetadataRequest, FileParameter, RepositoryApiClient, IRepositoryApiClient, PutFieldValsRequest, FieldToUpdate, ValueToUpdate, Entry, EntryType, Shortcut } from '@laserfiche/lf-repository-api-client';
+import { PostEntryWithEdocMetadataRequest, FileParameter, RepositoryApiClient, IRepositoryApiClient, PutFieldValsRequest, FieldToUpdate, ValueToUpdate, Entry, EntryType, Shortcut, PostEntryChildrenRequest, PostEntryChildrenEntryType} from '@laserfiche/lf-repository-api-client';
 import { LfFieldsService, LfRepoTreeNodeService, IRepositoryApiClientEx, LfRepoTreeNode } from '@laserfiche/lf-ui-components-services';
 import { LfLocalizationService, PathUtils } from '@laserfiche/lf-js-utils';
 import { LfLoginComponent } from '@laserfiche/lf-ui-components/lf-login';
@@ -7,6 +7,7 @@ import { LfFieldContainerComponent } from '@laserfiche/lf-ui-components/lf-metad
 import { LoginState } from '@laserfiche/lf-ui-components/shared';
 import { LfRepositoryBrowserComponent, LfTreeNode } from '@laserfiche/lf-ui-components/lf-repository-browser';
 import { ColumnDef } from '@laserfiche/lf-ui-components/lf-selection-list';
+import { ToolbarOption } from '@laserfiche/lf-ui-components/shared';
 import { getEntryWebAccessUrl } from './lf-url-utils';
 
 const resources: Map<string, object> = new Map<string, object>([
@@ -46,6 +47,10 @@ export class AppComponent implements AfterViewInit {
   CLIENT_ID: string = '6bd54321-2737-4a42-985d-abac41375af5';
   HOST_NAME: string = 'a.clouddev.laserfiche.com'; // only update this if you are using a different environment (i.e. a.clouddev.laserfiche.com)
   SCOPE: string = 'repository.Read repository.Write'; // Scope(s) requested by the app
+
+  // temporary robbie values for development
+  toolbarOptions: ToolbarOption[] = [{name: 'Refresh', disabled: false}, {name: 'New Folder', disabled: false}];
+  shouldShowModal: boolean = false;
 
   // repository client that will be used to connect to the LF API
   private repoClient?: IRepositoryApiClientExInternal;
@@ -297,6 +302,63 @@ export class AppComponent implements AfterViewInit {
     const customEvent = event as CustomEvent<LfTreeNode[]>;
     const treeNodesSelected: LfTreeNode[] = customEvent.detail;
     this.entrySelected = treeNodesSelected?.length > 0 ? treeNodesSelected[0] : undefined;
+  }
+
+  async onToolbarOptionSelected(event) {
+    const customEvent = event as CustomEvent<ToolbarOption>;
+    const optionSelected: ToolbarOption = customEvent.detail;
+    if (optionSelected.name == 'Refresh') {
+      await this.lfRepositoryBrowser?.nativeElement.refreshAsync();
+      console.log('refresh');
+    }
+    if (optionSelected.name == 'New Folder') {
+      this.shouldShowModal = true;
+    }
+  }
+
+  async makeNewFolder(folderName: string) {
+    if (folderName) {
+      if (!this.lfRepositoryBrowser?.nativeElement?.currentFolder) {
+        throw new Error('repositoryBrowser has no currently opened folder.');
+      }
+      try {
+        await this.addNewFolderAsync(this.lfRepositoryBrowser?.nativeElement?.currentFolder, folderName);
+        await this.lfRepositoryBrowser?.nativeElement?.refreshAsync();
+      }
+      catch (e: any) {
+        if (e.title) {
+          console.error(e.title);
+        }
+        else {
+          console.error("unknown error in makeNewFolder");
+        }
+      }
+    }
+  }
+
+  async addNewFolderAsync(parentNode: LfTreeNode, folderName: string): Promise<void> {
+    if (!this.repoClient){
+      throw new Error('repoClient is undefined');
+    }
+    const requestParameters: { entryId: number; postEntryChildrenRequest: PostEntryChildrenRequest } = {
+      entryId: parseInt(parentNode.id, 10),
+      postEntryChildrenRequest: new PostEntryChildrenRequest({
+        name: folderName,
+        entryType: PostEntryChildrenEntryType.Folder
+      })
+    };
+    const repoId: string = await this.repoClient.getCurrentRepoId();
+    await this.repoClient?.entriesClient.createOrCopyEntry(
+      {
+        repoId,
+        entryId: requestParameters.entryId,
+        request: requestParameters.postEntryChildrenRequest
+      }
+    );
+  }
+
+  closeModal() {
+    this.shouldShowModal = false;
   }
 
   async onOpenNode() {
