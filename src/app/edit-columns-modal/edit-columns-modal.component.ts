@@ -1,7 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { LfLocalizationService} from '@laserfiche/lf-js-utils';
 import { ColumnDef } from '@laserfiche/lf-ui-components/lf-selection-list';
-import { MatCheckbox, MatCheckboxChange} from '@angular/material/checkbox';
 
 
 const resources: Map<string, object> = new Map<string, object>([
