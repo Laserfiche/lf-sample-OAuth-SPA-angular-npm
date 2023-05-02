@@ -9,11 +9,11 @@
     <div class="lf-dialog-message">
       <p *ngIf="errorMessage" class="popup-error">{{errorMessage}}</p>
       <div *ngFor="let column of allColumnOptions" class="column-list">
-        <mat-checkbox
-          [checked]="columnsSelected.includes(column)"
+        <input
+          type="checkbox"
+          [checked] = "initialColumnsSelected.includes(column)"
           id ="{{column.id}}-checkbox"
           (change) = "onCheckboxChange(column)">
-        </mat-checkbox>
         <label for="{{column.id}}-checkbox"> {{column.displayName}}</label>
       </div>
     </div>
