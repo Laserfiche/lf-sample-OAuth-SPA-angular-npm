@@ -8,11 +8,14 @@ import { LfRepositoryBrowserModule } from '@laserfiche/lf-ui-components/lf-repos
 import { LfToolbarModule } from '@laserfiche/lf-ui-components/shared';
 import { LfBreadcrumbsModule } from '@laserfiche/lf-ui-components/shared';
 import { NewFolderModalComponent } from './new-folder-modal/new-folder-modal.component';
+import { EditColumnsModalComponent } from './edit-columns-modal/edit-columns-modal.component';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @NgModule({
   declarations: [
     AppComponent,
-    NewFolderModalComponent
+    NewFolderModalComponent,
+    EditColumnsModalComponent
   ],
   imports: [
     BrowserModule,
@@ -22,6 +25,7 @@ import { NewFolderModalComponent } from './new-folder-modal/new-folder-modal.com
     LfRepositoryBrowserModule,
     LfToolbarModule,
     LfMetadataModule,
+    MatCheckboxModule,
   ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]

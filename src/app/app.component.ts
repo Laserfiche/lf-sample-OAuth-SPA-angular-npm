@@ -49,8 +49,58 @@ export class AppComponent implements AfterViewInit {
   SCOPE: string = 'repository.Read repository.Write'; // Scope(s) requested by the app
 
   // temporary robbie values for development
-  toolbarOptions: ToolbarOption[] = [{name: 'Refresh', disabled: false}, {name: 'New Folder', disabled: false}];
-  shouldShowModal: boolean = false;
+  toolbarOptions: ToolbarOption[] = [{name: 'Refresh', disabled: false}, {name: 'New Folder', disabled: false}, {name: 'Add/Remove Columns', disabled: false}];
+  shouldShowNewFolderModal: boolean = false;
+  shouldShowEditColumnsModal: boolean = false;
+  allPossibleColumns: ColumnDef[] = [
+    {
+      id: 'creationTime',
+      displayName: 'Creation Time',
+      defaultWidth: 'auto',
+      resizable: true,
+      sortable: true,
+    },
+    {
+      id: 'lastModifiedTime',
+      displayName: 'Last Modified Time',
+      defaultWidth: 'auto',
+      resizable: true,
+      sortable: true,
+    },
+    {
+      id: 'pageCount',
+      displayName: 'Page Count',
+      defaultWidth: 'auto',
+      resizable: true,
+      sortable: true,
+    },
+    {
+      id: 'templateName',
+      displayName: 'Template Name',
+      defaultWidth: 'auto',
+      resizable: true,
+      sortable: true,
+    },
+    {
+      id: 'creator',
+      displayName: 'Author',
+      defaultWidth: 'auto',
+      resizable: true,
+      sortable: true,
+    }
+  ];
+  selectedColumns: ColumnDef[] = [
+    {
+      id: 'name',
+      displayName: 'Name',
+      defaultWidth: 'auto',
+      minWidthPx: 100,
+      resizable: true,
+      sortable: true,
+    },
+    this.allPossibleColumns[0],
+    this.allPossibleColumns[4],
+  ];
 
   // repository client that will be used to connect to the LF API
   private repoClient?: IRepositoryApiClientExInternal;
@@ -94,34 +144,9 @@ export class AppComponent implements AfterViewInit {
     });
   }
 
-  setFakeColumns() {
-    const columns: ColumnDef[] = [
-      {
-        id: 'name',
-        displayName: 'Name',
-        defaultWidth: 'auto',
-        minWidthPx: 100,
-        resizable: true,
-        sortable: true,
-      },
-      {
-        id: 'creationTime',
-        displayName: 'Creation Time',
-        defaultWidth: 'auto',
-        minWidthPx: 100,
-        resizable: true,
-        sortable: true,
-      },
-      {
-        id: 'creator',
-        displayName: 'Author',
-        defaultWidth: 'auto',
-        minWidthPx: 100,
-        resizable: true,
-        sortable: true,
-      }
-    ];
+  setColumns(columns) {
     this.lfRepositoryBrowser?.nativeElement.setColumnsToDisplay(columns);
+    this.selectedColumns = columns;
   }
 
   async onLoginCompletedAsync() {
@@ -311,8 +336,11 @@ export class AppComponent implements AfterViewInit {
       await this.lfRepositoryBrowser?.nativeElement.refreshAsync();
       console.log('refresh');
     }
-    if (optionSelected.name == 'New Folder') {
-      this.shouldShowModal = true;
+    else if (optionSelected.name == 'New Folder') {
+      this.shouldShowNewFolderModal = true;
+    }
+    else if (optionSelected.name == 'Add/Remove Columns') {
+      this.shouldShowEditColumnsModal = true;
     }
   }
 
@@ -357,8 +385,11 @@ export class AppComponent implements AfterViewInit {
     );
   }
 
-  closeModal() {
-    this.shouldShowModal = false;
+  closeNewFolderModal() {
+    this.shouldShowNewFolderModal = false;
+  }
+  closeEditColumnsModal() {
+    this.shouldShowEditColumnsModal = false;
   }
 
   async onOpenNode() {
@@ -367,9 +398,9 @@ export class AppComponent implements AfterViewInit {
 
   async onClickBrowse() {
     this.expandFolderBrowser = true;
-    this.lfRepoTreeNodeService.columnIds = ['creationTime', 'lastModifiedTime', 'pageCount', 'templateName', 'creator'];
+    this.lfRepoTreeNodeService.columnIds = this.allPossibleColumns.map(columnDef => columnDef.id);
     await this.initializeTreeAsync();
-    this.setFakeColumns();
+    this.setColumns(this.selectedColumns);
   }
 
   get selectedFolderDisplayName(): string {

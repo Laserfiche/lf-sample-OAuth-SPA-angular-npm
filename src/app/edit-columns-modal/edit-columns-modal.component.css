@@ -1,0 +1,123 @@
+.edit-columns-dialog-modal {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* pointer-events: none; */
+  z-index: 1000;
+}
+.edit-columns-dialog-modal.exit {
+  opacity: 0;
+}
+
+.edit-columns-dialog-modal-content {
+  background-color: #fff;
+  border-radius: 4px;
+  padding: 24px;
+  width: 430px;
+  max-width: 80vw;
+  opacity: 0;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0px 11px 15px -7px rgb(0 0 0 / 20%), 0px 24px 38px 3px rgb(0 0 0 / 14%), 0px 9px 46px 8px rgb(0 0 0 / 12%);
+}
+
+.edit-columns-dialog-modal-content.show {
+  opacity: 1;
+  pointer-events: visible;
+}
+
+.edit-columns-dialog-modal-header,
+.edit-columns-dialog-modal-footer {
+  padding: 10px;
+}
+
+.edit-columns-dialog-modal-title {
+  margin: 0;
+}
+
+.edit-columns-label {
+  font-size: 14px;
+  display: inline;
+  vertical-align: top;
+  padding-right: 20px;
+  line-height: 34px;
+  font-family: "Open Sans";
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.popup-error {
+  font-size: 14px;
+}
+
+.edit-columns-name-input-outline {
+  display: inline-block;
+  position: relative;
+  text-align: left;
+  font-size: inherit;
+  font-weight: 400;
+  line-height: 1.125;
+  height: 28px;
+  border-color: #ccc;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  letter-spacing: normal;
+}
+
+.edit-columns-name-input {
+  display: inline-block;
+  position: relative;
+  text-align: left;
+  font-size: inherit;
+  font-weight: 400;
+  line-height: 1.125;
+  height: 24px;
+  outline: none;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  letter-spacing: normal;
+  border-radius: 4px;
+  border-width: 1px;
+  padding-left: 10px;
+}
+
+.edit-columns-name-input:hover,
+.edit-columns-name-input:focus {
+  border-width: 2px;
+}
+
+.lf-dialog-message {
+  margin: 14px 0 20px 0;
+}
+
+.lf-close-button {
+  cursor: pointer;
+  float: right;
+  display: inline;
+  background-color: inherit;
+  border: none;
+  padding: 0;
+  margin-right: 1px;
+  margin-left: 2px;
+  margin-top: 4px;
+  line-height: 16px;
+}
+
+span#edit-columns-dialog-close-icon {
+  color: rgb(170, 170, 170);
+  opacity: 0.6;
+  font-size: 20px;
+}
+
+span#edit-columns-dialog-close-icon:hover {
+  opacity: 1;
+}
+
+.lf-dialog-actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  padding-top: 5px;
+}
