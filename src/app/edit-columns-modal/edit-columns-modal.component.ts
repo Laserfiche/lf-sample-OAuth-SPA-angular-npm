@@ -6,13 +6,11 @@ import {MatDialog, MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog
 
 const resources: Map<string, object> = new Map<string, object>([
   ['en-US', {
-    'NAME': 'Name',
     'OK': 'Ok',
     'CANCEL': 'Cancel',
     'ADD_REMOVE_COLUMNS': 'Add/Remove Columns',
   }],
   ['es-MX', {
-    'NAME': 'Name -Spanish',
     'OK': 'Ok - Spanish',
     'CANCEL': 'Cancel - Spanish',
     'ADD_REMOVE_COLUMNS': 'Add/Remove Columns - Spanish',
