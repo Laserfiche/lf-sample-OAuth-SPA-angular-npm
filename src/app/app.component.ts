@@ -56,17 +56,17 @@ export class AppComponent implements AfterViewInit {
     {
       name: 'Refresh',
       disabled: false,
-      tag: {handler:  async () => {await this.lfRepositoryBrowser?.nativeElement.refreshAsync()} }
+      tag: {handler:  async () => {await this.lfRepositoryBrowser?.nativeElement.refreshAsync();} }
     },
     {
       name: 'New Folder',
       disabled: false,
-      tag: {handler:  () => {this.openNewFolderDialog()} }
+      tag: {handler:  () => {this.openNewFolderDialog();} }
     },
     {
       name: 'Add/Remove Columns',
       disabled: false,
-      tag: {handler:  () => {this.openEditColumnsDialog()} }
+      tag: {handler:  () => {this.openEditColumnsDialog();} }
     }
   ];
   shouldShowEditColumnsModal: boolean = false;
@@ -362,8 +362,8 @@ export class AppComponent implements AfterViewInit {
 
   openEditColumnsDialog(): void {
     this.dialog.open(EditColumnsModalComponent, {
-      data: { columnsSelected: this.selectedColumns, allColumnOptions: this.allPossibleColumns, updateColumns: this.updateColumns.bind(this) },
-    })
+      data: { columnsSelected: this.selectedColumns, allColumnOptions: this.allPossibleColumns, updateColumns: this.updateColumns.bind(this),},
+    });
   }
 
   async makeNewFolder(folderName: string) {
@@ -383,7 +383,7 @@ export class AppComponent implements AfterViewInit {
     if (!this.repoClient){
       throw new Error('repoClient is undefined');
     }
-    let entryId = (parentNode as LfRepoTreeNode).targetId ?? parseInt( parentNode.id, 10);
+    const entryId = (parentNode as LfRepoTreeNode).targetId ?? parseInt( parentNode.id, 10);
 
     const requestParameters: { entryId: number; postEntryChildrenRequest: PostEntryChildrenRequest } = {
       entryId,

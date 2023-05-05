@@ -20,9 +20,9 @@ const resources: Map<string, object> = new Map<string, object>([
 ]);
 
 interface EditColumnsDialogData {
-  columnsSelected: ColumnDef[],
-  allColumnOptions: ColumnDef[],
-  updateColumns: (columns: ColumnDef[]) => void,
+  columnsSelected: ColumnDef[];
+  allColumnOptions: ColumnDef[];
+  updateColumns: (columns: ColumnDef[]) => void;
 }
 
 
