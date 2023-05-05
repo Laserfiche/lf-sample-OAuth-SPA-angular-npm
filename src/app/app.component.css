@@ -50,7 +50,7 @@ svg#close {
   position: relative;
 }
 
-.lfToolBar {
+lf-toolbar {
   position: absolute;
   right: 0;
   top: 0

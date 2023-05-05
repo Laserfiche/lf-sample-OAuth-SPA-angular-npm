@@ -9,6 +9,7 @@ import { LfToolbarModule } from '@laserfiche/lf-ui-components/shared';
 import { LfBreadcrumbsModule } from '@laserfiche/lf-ui-components/shared';
 import { NewFolderModalComponent } from './new-folder-modal/new-folder-modal.component';
 import { EditColumnsModalComponent } from './edit-columns-modal/edit-columns-modal.component';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
@@ -24,6 +25,7 @@ import { EditColumnsModalComponent } from './edit-columns-modal/edit-columns-mod
     LfRepositoryBrowserModule,
     LfToolbarModule,
     LfMetadataModule,
+    MatDialogModule,
   ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]

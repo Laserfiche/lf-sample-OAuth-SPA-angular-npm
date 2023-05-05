@@ -1,6 +1,7 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, Inject } from '@angular/core';
 import { LfLocalizationService} from '@laserfiche/lf-js-utils';
 import { ColumnDef } from '@laserfiche/lf-ui-components/lf-selection-list';
+import {MatDialog, MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
 
 const resources: Map<string, object> = new Map<string, object>([
@@ -18,6 +19,12 @@ const resources: Map<string, object> = new Map<string, object>([
   }]
 ]);
 
+interface EditColumnsDialogData {
+  columnsSelected: ColumnDef[],
+  allColumnOptions: ColumnDef[],
+  updateColumns: (columns: ColumnDef[]) => void,
+}
+
 
 @Component({
   selector: 'app-edit-columns-modal',
@@ -33,39 +40,30 @@ export class EditColumnsModalComponent implements OnInit {
   CANCEL = this.localizationService.getString('CANCEL');
   ADD_REMOVE_COLUMNS = this.localizationService.getString('ADD_REMOVE_COLUMNS');
 
-  errorMessage?: string;
-  columnsSelected?: ColumnDef[];
-
-  @Input() initialColumnsSelected: ColumnDef[] = [];
-  @Input() allColumnOptions: ColumnDef[] = [];
-
   @Output() columnEmitter: EventEmitter<ColumnDef[]> = new EventEmitter<ColumnDef[]>();
   @Output() shouldCloseModal: EventEmitter<boolean> = new EventEmitter<boolean>();
 
 
-  constructor() { }
+  constructor(
+    public dialogRef: MatDialogRef<EditColumnsModalComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: EditColumnsDialogData,
+  ) { }
 
   ngOnInit(): void {
-    this.columnsSelected = this.initialColumnsSelected.map(value => value);
   }
 
-  closeDialog(columns?: ColumnDef[]) {
-    this.columnEmitter.emit(columns ?? this.initialColumnsSelected);
-    this.shouldCloseModal.emit(true);
-  }
-
-  onModalClick(event: MouseEvent)  {
-    const isInsideModal = event.target instanceof Element && event.target.closest('.edit-columns-dialog-modal-content');
-
-    if (!isInsideModal) {
-      this.closeDialog();
+  async closeDialog(columns?: ColumnDef[]) {
+    if (columns){
+      this.data.updateColumns(columns);
     }
+    this.dialogRef.close(columns);
   }
+
   onCheckboxChange(column: ColumnDef) {
-    if (this.columnsSelected.includes(column)) {
-      this.columnsSelected = this.columnsSelected.filter(c => c != column);
+    if (this.data.columnsSelected.includes(column)) {
+      this.data.columnsSelected = this.data.columnsSelected.filter(c => c != column);
     } else {
-      this.columnsSelected.push(column);
+      this.data.columnsSelected.push(column);
     }
   }
 

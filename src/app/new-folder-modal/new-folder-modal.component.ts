@@ -1,6 +1,6 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, Inject } from '@angular/core';
 import { LfLocalizationService} from '@laserfiche/lf-js-utils';
-
+import {MatDialog, MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
 const resources: Map<string, object> = new Map<string, object>([
   ['en-US', {
@@ -18,12 +18,15 @@ const resources: Map<string, object> = new Map<string, object>([
 ]);
 
 
+interface NewFolderDialogData {
+  makeNewFolder:  (folderName: string) => Promise<void>;
+}
+
 @Component({
   selector: 'app-new-folder-modal',
   templateUrl: './new-folder-modal.component.html',
   styleUrls: ['./new-folder-modal.component.css']
 })
-
 export class NewFolderModalComponent implements OnInit {
   localizationService: LfLocalizationService = new LfLocalizationService(resources);
 
@@ -35,26 +38,27 @@ export class NewFolderModalComponent implements OnInit {
   errorMessage?: string;
   folderName?: string;
 
-
-  @Output() folderEmitter: EventEmitter<string> = new EventEmitter<string>();
-  @Output() shouldCloseModal: EventEmitter<boolean> = new EventEmitter<boolean>();
-
-
-  constructor() { }
+  constructor(
+    public dialogRef: MatDialogRef<NewFolderModalComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: NewFolderDialogData,
+  ) { }
 
   ngOnInit(): void {
   }
 
-  closeDialog(folder?: string) {
-    this.folderEmitter.emit(folder ?? "");
-    this.shouldCloseModal.emit(true);
-  }
+  async closeDialog(folder?: string) {
+    if (!folder){
+      this.dialogRef.close();
+      return;
+    }
 
-  onModalClick(event: MouseEvent)  {
-    const isInsideModal = event.target instanceof Element && event.target.closest('.new-folder-dialog-modal-content');
-
-    if (!isInsideModal) {
-      this.closeDialog();
+    try{
+      await this.data.makeNewFolder(folder ?? "");
+      this.dialogRef.close(folder);
+    }
+    catch (error: any) {
+      console.log(error);
+      this.errorMessage = error.message;
     }
   }
 

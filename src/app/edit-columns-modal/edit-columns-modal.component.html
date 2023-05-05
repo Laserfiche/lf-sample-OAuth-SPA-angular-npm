@@ -1,4 +1,4 @@
-<div class="edit-columns-dialog-modal" (click)="onModalClick($event)">
+<div class="edit-columns-dialog-modal">
   <div class="edit-columns-dialog-modal-content show" id="edit-columns-dialog-content">
     <div class="edit-columns-dialog-modal-title">
       <span class="lf-dialog-title lf-popup-dialog-title">{{ADD_REMOVE_COLUMNS}}</span>
@@ -7,18 +7,17 @@
       </button>
     </div>
     <div class="lf-dialog-message">
-      <p *ngIf="errorMessage" class="popup-error">{{errorMessage}}</p>
-      <div *ngFor="let column of allColumnOptions" class="column-list">
+      <div *ngFor="let column of data.allColumnOptions" class="column-list">
         <input
           type="checkbox"
-          [checked] = "initialColumnsSelected.includes(column)"
+          [checked] = "data.columnsSelected.includes(column)"
           id ="{{column.id}}-checkbox"
           (change) = "onCheckboxChange(column)">
         <label for="{{column.id}}-checkbox"> {{column.displayName}}</label>
       </div>
     </div>
     <div class="lf-dialog-actions">
-      <button (click)="closeDialog(columnsSelected)"  class="lf-button primary-button">{{OK}}</button>
+      <button (click)="closeDialog(data.columnsSelected)"  class="lf-button primary-button">{{OK}}</button>
       <button (click)="closeDialog()" class="lf-button sec-button margin-left-button">{{CANCEL}}</button>
     </div>
   </div>

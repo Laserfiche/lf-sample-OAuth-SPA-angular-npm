@@ -121,3 +121,7 @@ span#new-folder-dialog-close-icon:hover {
   justify-content: flex-end;
   padding-top: 5px;
 }
+
+.lf-dialog-actions .lf-button {
+  margin: 10px;
+}
