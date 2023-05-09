@@ -51,7 +51,6 @@ export class AppComponent implements AfterViewInit {
   HOST_NAME: string = 'a.clouddev.laserfiche.com'; // only update this if you are using a different environment (i.e. a.clouddev.laserfiche.com)
   SCOPE: string = 'repository.Read repository.Write'; // Scope(s) requested by the app
 
-  // temporary robbie values for development
   toolbarOptions: ToolbarOption[] = [
     {
       name: 'Refresh',
@@ -378,14 +377,16 @@ export class AppComponent implements AfterViewInit {
     if (!this.repoClient){
       throw new Error('repoClient is undefined');
     }
-    const entryId = (parentNode as LfRepoTreeNode).targetId ?? parseInt( parentNode.id, 10);
+    type RequestParameters = { entryId: number; postEntryChildrenRequest: PostEntryChildrenRequest };
 
-    const requestParameters: { entryId: number; postEntryChildrenRequest: PostEntryChildrenRequest } = {
+    const entryId = (parentNode as LfRepoTreeNode).targetId ?? parseInt( parentNode.id, 10);
+    const postEntryChildrenRequest: PostEntryChildrenRequest = new PostEntryChildrenRequest({
+      name: folderName,
+      entryType: PostEntryChildrenEntryType.Folder,
+    });
+    const requestParameters: RequestParameters = {
       entryId,
-      postEntryChildrenRequest: new PostEntryChildrenRequest({
-        name: folderName,
-        entryType: PostEntryChildrenEntryType.Folder
-      })
+      postEntryChildrenRequest,
     };
     const repoId: string = await this.repoClient.getCurrentRepoId();
     await this.repoClient?.entriesClient.createOrCopyEntry(

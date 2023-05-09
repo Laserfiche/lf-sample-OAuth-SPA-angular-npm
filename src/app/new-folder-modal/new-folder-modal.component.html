@@ -12,7 +12,7 @@
           <input id="new-folder-name-input" class="new-folder-name-input" [(ngModel)] = "folderName">
     </div>
     <div class="lf-dialog-actions">
-      <button (click)="closeDialog(folderName)" [disabled]="!folderName || folderName.trim().length === 0" class="lf-button primary-button">{{OK}}</button>
+      <button (click)="closeDialog(folderName)" [disabled]="!(folderName?.length > 0)" class="lf-button primary-button">{{OK}}</button>
       <button (click)="closeDialog()" class="lf-button sec-button margin-left-button">{{CANCEL}}</button>
     </div>
   </div>
