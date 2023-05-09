@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { PostEntryWithEdocMetadataRequest, FileParameter, RepositoryApiClient, IRepositoryApiClient, PutFieldValsRequest, FieldToUpdate, ValueToUpdate, Entry, EntryType, Shortcut, PostEntryChildrenRequest, PostEntryChildrenEntryType} from '@laserfiche/lf-repository-api-client';
+import { PostEntryWithEdocMetadataRequest, FileParameter, RepositoryApiClient, IRepositoryApiClient, PutFieldValsRequest, FieldToUpdate, ValueToUpdate, EntryType, Shortcut, PostEntryChildrenRequest, PostEntryChildrenEntryType} from '@laserfiche/lf-repository-api-client';
 import { LfFieldsService, LfRepoTreeNodeService, IRepositoryApiClientEx, LfRepoTreeNode } from '@laserfiche/lf-ui-components-services';
 import { LfLocalizationService, PathUtils } from '@laserfiche/lf-js-utils';
 import { LfLoginComponent } from '@laserfiche/lf-ui-components/lf-login';
@@ -46,9 +46,9 @@ interface ILfSelectedFolder {
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements AfterViewInit {
-  REDIRECT_URI: string = 'REPLACE_WITH_YOUR_REDIRECT_URI'; // i.e http://localhost:3000, https://serverName/lf-sample/index.html
-  CLIENT_ID: string = 'REPLACE_WITH_YOUR_CLIENT_ID';
-  HOST_NAME: string = 'laserfiche.com'; // only update this if you are using a different environment (i.e. a.clouddev.laserfiche.com)
+  REDIRECT_URI: string = 'http://localhost/npm-sample-spa';//'REPLACE_WITH_YOUR_REDIRECT_URI'; // i.e http://localhost:3000, https://serverName/lf-sample/index.html
+  CLIENT_ID: string = '6bd54321-2737-4a42-985d-abac41375af5' //'REPLACE_WITH_YOUR_CLIENT_ID';
+  HOST_NAME: string = 'a.clouddev.laserfiche.com'; // only update this if you are using a different environment (i.e. a.clouddev.laserfiche.com)
   SCOPE: string = 'repository.Read repository.Write'; // Scope(s) requested by the app
 
   // temporary robbie values for development
@@ -69,7 +69,6 @@ export class AppComponent implements AfterViewInit {
       tag: {handler:  () => {this.openEditColumnsDialog();} }
     }
   ];
-  shouldShowEditColumnsModal: boolean = false;
   allPossibleColumns: ColumnDef[] = [
     {
       id: 'creationTime',
@@ -126,10 +125,9 @@ export class AppComponent implements AfterViewInit {
   @ViewChild('fileInput') fileInput: ElementRef<HTMLInputElement>;
 
   lfSelectedFolder: ILfSelectedFolder | undefined;
-  lfFieldContainerElement: ElementRef<LfFieldContainerComponent>;
 
   // the UI components
-  @ViewChildren('lfFieldContainerElement') public lfFieldContainerQueryList: QueryList<ElementRef<LfFieldContainerComponent>>;
+  @ViewChild('lfFieldContainerElement') lfFieldContainerElement: ElementRef<LfFieldContainerComponent>;
   @ViewChild('loginComponent') loginComponent?: ElementRef<LfLoginComponent>;
   @ViewChild('lfRepositoryBrowser') lfRepositoryBrowser?: ElementRef<LfRepositoryBrowserComponent>;
 
@@ -157,10 +155,7 @@ export class AppComponent implements AfterViewInit {
   // Angular hook, after view is initiated
   async ngAfterViewInit(): Promise<void> {
     await this.getAndInitializeRepositoryClientAndServicesAsync();
-    this.lfFieldContainerQueryList.changes.subscribe(async (comps: QueryList<ElementRef<LfFieldContainerComponent>>) => {
-      this.lfFieldContainerElement = comps.first;
-      await this.lfFieldContainerElement?.nativeElement.initAsync(this.lfFieldsService);
-    });
+    await this.initializeFieldContainerAsync();
   }
 
   setColumns(columns) {

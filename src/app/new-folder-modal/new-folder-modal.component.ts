@@ -1,6 +1,6 @@
-import { Component, OnInit, Input, Output, EventEmitter, Inject } from '@angular/core';
+import { Component, Inject} from '@angular/core';
 import { LfLocalizationService} from '@laserfiche/lf-js-utils';
-import {MatDialog, MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
 const resources: Map<string, object> = new Map<string, object>([
   ['en-US', {
@@ -27,7 +27,7 @@ interface NewFolderDialogData {
   templateUrl: './new-folder-modal.component.html',
   styleUrls: ['./new-folder-modal.component.css']
 })
-export class NewFolderModalComponent implements OnInit {
+export class NewFolderModalComponent {
   localizationService: LfLocalizationService = new LfLocalizationService(resources);
 
   NAME = this.localizationService.getString('NAME');
@@ -42,9 +42,6 @@ export class NewFolderModalComponent implements OnInit {
     public dialogRef: MatDialogRef<NewFolderModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: NewFolderDialogData,
   ) { }
-
-  ngOnInit(): void {
-  }
 
   async closeDialog(folder?: string) {
     if (!folder){

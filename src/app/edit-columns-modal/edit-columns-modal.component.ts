@@ -1,7 +1,7 @@
-import { Component, OnInit, Input, Output, EventEmitter, Inject } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Inject } from '@angular/core';
 import { LfLocalizationService} from '@laserfiche/lf-js-utils';
 import { ColumnDef } from '@laserfiche/lf-ui-components/lf-selection-list';
-import {MatDialog, MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
 
 const resources: Map<string, object> = new Map<string, object>([
@@ -33,7 +33,6 @@ interface EditColumnsDialogData {
 export class EditColumnsModalComponent implements OnInit {
   localizationService: LfLocalizationService = new LfLocalizationService(resources);
 
-  NAME = this.localizationService.getString('NAME');
   OK = this.localizationService.getString('OK');
   CANCEL = this.localizationService.getString('CANCEL');
   ADD_REMOVE_COLUMNS = this.localizationService.getString('ADD_REMOVE_COLUMNS');
