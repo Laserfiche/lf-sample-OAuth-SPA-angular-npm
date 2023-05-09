@@ -47,7 +47,7 @@ interface ILfSelectedFolder {
 })
 export class AppComponent implements AfterViewInit {
   REDIRECT_URI: string = 'http://localhost/npm-sample-spa';//'REPLACE_WITH_YOUR_REDIRECT_URI'; // i.e http://localhost:3000, https://serverName/lf-sample/index.html
-  CLIENT_ID: string = '6bd54321-2737-4a42-985d-abac41375af5' //'REPLACE_WITH_YOUR_CLIENT_ID';
+  CLIENT_ID: string = '6bd54321-2737-4a42-985d-abac41375af5'; //'REPLACE_WITH_YOUR_CLIENT_ID';
   HOST_NAME: string = 'a.clouddev.laserfiche.com'; // only update this if you are using a different environment (i.e. a.clouddev.laserfiche.com)
   SCOPE: string = 'repository.Read repository.Write'; // Scope(s) requested by the app
 

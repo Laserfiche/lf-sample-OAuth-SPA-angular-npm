@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, Inject } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { LfLocalizationService} from '@laserfiche/lf-js-utils';
 import { ColumnDef } from '@laserfiche/lf-ui-components/lf-selection-list';
 import { MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
@@ -30,24 +30,17 @@ interface EditColumnsDialogData {
   styleUrls: ['./edit-columns-modal.component.css']
 })
 
-export class EditColumnsModalComponent implements OnInit {
+export class EditColumnsModalComponent {
   localizationService: LfLocalizationService = new LfLocalizationService(resources);
 
   OK = this.localizationService.getString('OK');
   CANCEL = this.localizationService.getString('CANCEL');
   ADD_REMOVE_COLUMNS = this.localizationService.getString('ADD_REMOVE_COLUMNS');
 
-  @Output() columnEmitter: EventEmitter<ColumnDef[]> = new EventEmitter<ColumnDef[]>();
-  @Output() shouldCloseModal: EventEmitter<boolean> = new EventEmitter<boolean>();
-
-
   constructor(
     public dialogRef: MatDialogRef<EditColumnsModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: EditColumnsDialogData,
   ) { }
-
-  ngOnInit(): void {
-  }
 
   async closeDialog(columns?: ColumnDef[]) {
     if (columns){
