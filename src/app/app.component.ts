@@ -1,11 +1,39 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { PostEntryWithEdocMetadataRequest, FileParameter, RepositoryApiClient, IRepositoryApiClient, PutFieldValsRequest, FieldToUpdate, ValueToUpdate, EntryType, Shortcut, PostEntryChildrenRequest, PostEntryChildrenEntryType} from '@laserfiche/lf-repository-api-client';
-import { LfFieldsService, LfRepoTreeNodeService, IRepositoryApiClientEx, LfRepoTreeNode } from '@laserfiche/lf-ui-components-services';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  QueryList,
+  ViewChild,
+  ViewChildren,
+} from '@angular/core';
+import {
+  PostEntryWithEdocMetadataRequest,
+  FileParameter,
+  RepositoryApiClient,
+  IRepositoryApiClient,
+  PutFieldValsRequest,
+  FieldToUpdate,
+  ValueToUpdate,
+  EntryType,
+  Shortcut,
+  PostEntryChildrenRequest,
+  PostEntryChildrenEntryType,
+} from '@laserfiche/lf-repository-api-client';
+import {
+  LfFieldsService,
+  LfRepoTreeNodeService,
+  IRepositoryApiClientEx,
+  LfRepoTreeNode,
+} from '@laserfiche/lf-ui-components-services';
 import { LfLocalizationService, PathUtils } from '@laserfiche/lf-js-utils';
 import { LfLoginComponent } from '@laserfiche/lf-ui-components/lf-login';
 import { LfFieldContainerComponent } from '@laserfiche/lf-ui-components/lf-metadata';
 import { LoginState } from '@laserfiche/lf-ui-components/shared';
-import { LfRepositoryBrowserComponent, LfTreeNode } from '@laserfiche/lf-ui-components/lf-repository-browser';
+import {
+  LfRepositoryBrowserComponent,
+  LfTreeNode,
+} from '@laserfiche/lf-ui-components/lf-repository-browser';
 import { ColumnDef } from '@laserfiche/lf-ui-components/lf-selection-list';
 import { ToolbarOption } from '@laserfiche/lf-ui-components/shared';
 import { getEntryWebAccessUrl } from './lf-url-utils';
@@ -14,18 +42,23 @@ import { NewFolderModalComponent } from './new-folder-modal/new-folder-modal.com
 import { EditColumnsModalComponent } from './edit-columns-modal/edit-columns-modal.component';
 
 const resources: Map<string, object> = new Map<string, object>([
-  ['en-US', {
-    'FOLDER_BROWSER_PLACEHOLDER': 'No folder selected',
-    'SAVE_TO_LASERFICHE': 'Save to Laserfiche',
-    'CLICK_TO_UPLOAD': 'Click to upload file',
-    'SELECTED_FOLDER': 'Selected Folder: ',
-    'FILE_NAME': 'File Name: ',
-    'BROWSE': 'Browse',
-    'OPEN_IN_LASERFICHE': 'Open in Laserfiche',
-    'SELECT': 'Select',
-    'CANCEL': 'Cancel',
-    'ERROR_SAVING': 'Error Saving'
-  }]
+  [
+    'en-US',
+    {
+      FOLDER_BROWSER_PLACEHOLDER: 'No folder selected',
+      SAVE_TO_LASERFICHE: 'Save to Laserfiche',
+      CLICK_TO_UPLOAD: 'Click to upload file',
+      SELECTED_FOLDER: 'Selected Folder: ',
+      FILE_NAME: 'File Name: ',
+      BROWSE: 'Browse',
+      OPEN_IN_LASERFICHE: 'Open in Laserfiche',
+      SELECT: 'Select',
+      CANCEL: 'Cancel',
+      ERROR_SAVING: 'Error Saving',
+      PLEASE_PROVIDE_FOLDER_NAME: 'Please provide a folder name.',
+      NO_CURRENTLY_OPENED_FOLDER: 'There is no currently opened folder.',
+    },
+  ],
 ]);
 
 interface IRepositoryApiClientExInternal extends IRepositoryApiClientEx {
@@ -43,10 +76,10 @@ interface ILfSelectedFolder {
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements AfterViewInit {
-  REDIRECT_URI: string = 'http://localhost/npm-sample-spa';//'REPLACE_WITH_YOUR_REDIRECT_URI'; // i.e http://localhost:3000, https://serverName/lf-sample/index.html
+  REDIRECT_URI: string = 'http://localhost/npm-sample-spa'; //'REPLACE_WITH_YOUR_REDIRECT_URI'; // i.e http://localhost:3000, https://serverName/lf-sample/index.html
   CLIENT_ID: string = '6bd54321-2737-4a42-985d-abac41375af5'; //'REPLACE_WITH_YOUR_CLIENT_ID';
   HOST_NAME: string = 'a.clouddev.laserfiche.com'; // only update this if you are using a different environment (i.e. a.clouddev.laserfiche.com)
   SCOPE: string = 'repository.Read repository.Write'; // Scope(s) requested by the app
@@ -55,18 +88,30 @@ export class AppComponent implements AfterViewInit {
     {
       name: 'Refresh',
       disabled: false,
-      tag: {handler:  async () => {await this.lfRepositoryBrowser?.nativeElement.refreshAsync();} }
+      tag: {
+        handler: async () => {
+          await this.lfRepositoryBrowser?.nativeElement.refreshAsync();
+        },
+      },
     },
     {
       name: 'New Folder',
       disabled: false,
-      tag: {handler:  () => {this.openNewFolderDialog();} }
+      tag: {
+        handler: () => {
+          this.openNewFolderDialog();
+        },
+      },
     },
     {
       name: 'Add/Remove Columns',
       disabled: false,
-      tag: {handler:  () => {this.openEditColumnsDialog();} }
-    }
+      tag: {
+        handler: () => {
+          this.openEditColumnsDialog();
+        },
+      },
+    },
   ];
   allPossibleColumns: ColumnDef[] = [
     {
@@ -103,7 +148,7 @@ export class AppComponent implements AfterViewInit {
       defaultWidth: 'auto',
       resizable: true,
       sortable: true,
-    }
+    },
   ];
   selectedColumns: ColumnDef[] = [
     {
@@ -126,14 +171,15 @@ export class AppComponent implements AfterViewInit {
   lfSelectedFolder: ILfSelectedFolder | undefined;
 
   // the UI components
-  @ViewChild('lfFieldContainerElement') lfFieldContainerElement: ElementRef<LfFieldContainerComponent>;
+  @ViewChild('lfFieldContainerElement')
+  lfFieldContainerElement: ElementRef<LfFieldContainerComponent>;
   @ViewChild('loginComponent') loginComponent?: ElementRef<LfLoginComponent>;
-  @ViewChild('lfRepositoryBrowser') lfRepositoryBrowser?: ElementRef<LfRepositoryBrowserComponent>;
+  @ViewChild('lfRepositoryBrowser')
+  lfRepositoryBrowser?: ElementRef<LfRepositoryBrowserComponent>;
 
   // services needed for UI components
   lfFieldsService?: LfFieldsService;
   lfRepoTreeNodeService?: LfRepoTreeNodeService;
-
 
   // localization service from lf-js-utils
   localizationService = new LfLocalizationService(resources);
@@ -146,10 +192,7 @@ export class AppComponent implements AfterViewInit {
   fileExtension?: string;
   entrySelected: LfTreeNode;
 
-  constructor(
-    private ref: ChangeDetectorRef,
-    public dialog: MatDialog,
-  ) { }
+  constructor(private ref: ChangeDetectorRef, public dialog: MatDialog) {}
 
   // Angular hook, after view is initiated
   async ngAfterViewInit(): Promise<void> {
@@ -173,19 +216,23 @@ export class AppComponent implements AfterViewInit {
 
   private async getAndInitializeRepositoryClientAndServicesAsync() {
     // get accessToken from login component
-    const accessToken = this.loginComponent?.nativeElement?.authorization_credentials?.accessToken;
+    const accessToken =
+      this.loginComponent?.nativeElement?.authorization_credentials
+        ?.accessToken;
     if (accessToken) {
       await this.ensureRepoClientInitializedAsync();
 
       // create the tree service to interact with the LF Api
       this.lfRepoTreeNodeService = new LfRepoTreeNodeService(this.repoClient);
       // by default all entries are viewable
-      this.lfRepoTreeNodeService.viewableEntryTypes = [EntryType.Folder, EntryType.Shortcut];
+      this.lfRepoTreeNodeService.viewableEntryTypes = [
+        EntryType.Folder,
+        EntryType.Shortcut,
+      ];
 
       // create the fields service to let the field component interact with Laserfiche
       this.lfFieldsService = new LfFieldsService(this.repoClient);
-    }
-    else {
+    } else {
       // user is not logged in
     }
   }
@@ -193,12 +240,16 @@ export class AppComponent implements AfterViewInit {
   private afterFetchResponseAsync = async (url, response, request) => {
     if (response.status === 401) {
       // this will initialize the login flow if refresh is unsuccessful
-      const refresh = await this.loginComponent.nativeElement.refreshTokenAsync(true);
+      const refresh = await this.loginComponent.nativeElement.refreshTokenAsync(
+        true
+      );
       if (refresh) {
-        request.headers['Authorization'] = 'Bearer ' + this.loginComponent.nativeElement.authorization_credentials.accessToken;
+        request.headers['Authorization'] =
+          'Bearer ' +
+          this.loginComponent.nativeElement.authorization_credentials
+            .accessToken;
         return true;
-      }
-      else {
+      } else {
         this.repoClient.clearCurrentRepo();
         return false;
       }
@@ -208,18 +259,26 @@ export class AppComponent implements AfterViewInit {
 
   private beforeFetchRequestAsync = async (url, request) => {
     // need to get accessToken each time
-    const accessToken = this.loginComponent.nativeElement.authorization_credentials.accessToken;
+    const accessToken =
+      this.loginComponent.nativeElement.authorization_credentials.accessToken;
     if (accessToken) {
       request.headers['Authorization'] = 'Bearer ' + accessToken;
-      return { regionalDomain: this.HOST_NAME }; // update this if you want CA, EU, dev
-    }
-    else {
+      let regionalDomain: string =
+        this.loginComponent.nativeElement.account_endpoints.regionalDomain;
+      if (!regionalDomain) {
+        console.log('could not get regionalDomain from loginComponent');
+        regionalDomain = this.HOST_NAME;
+      }
+      return { regionalDomain };
+    } else {
       throw new Error('Access Token undefined.');
     }
   };
 
   private getCurrentRepo = async () => {
-    const repos = await this.repoClient.repositoriesClient.getRepositoryList({});
+    const repos = await this.repoClient.repositoriesClient.getRepositoryList(
+      {}
+    );
     const repo = repos[0];
     if (repo.repoId && repo.repoName) {
       return { repoId: repo.repoId, repoName: repo.repoName };
@@ -228,14 +287,12 @@ export class AppComponent implements AfterViewInit {
   };
 
   async ensureRepoClientInitializedAsync(): Promise<void> {
-
     if (!this.repoClient) {
       const partialRepoClient: IRepositoryApiClient =
-        RepositoryApiClient.createFromHttpRequestHandler(
-          {
-            beforeFetchRequestAsync: this.beforeFetchRequestAsync,
-            afterFetchResponseAsync: this.afterFetchResponseAsync
-          });
+        RepositoryApiClient.createFromHttpRequestHandler({
+          beforeFetchRequestAsync: this.beforeFetchRequestAsync,
+          afterFetchResponseAsync: this.afterFetchResponseAsync,
+        });
 
       const clearCurrentRepo = () => {
         this.repoClient._repoId = undefined;
@@ -249,8 +306,7 @@ export class AppComponent implements AfterViewInit {
         getCurrentRepoId: async () => {
           if (this.repoClient._repoId) {
             return this.repoClient._repoId;
-          }
-          else {
+          } else {
             const repo = (await this.getCurrentRepo()).repoId;
             this.repoClient._repoId = repo;
             return repo;
@@ -259,21 +315,22 @@ export class AppComponent implements AfterViewInit {
         getCurrentRepoName: async () => {
           if (this.repoClient._repoName) {
             return this.repoClient._repoName;
-          }
-          else {
+          } else {
             const repo = (await this.getCurrentRepo()).repoName;
             this.repoClient._repoName = repo;
             return repo;
           }
         },
-        ...partialRepoClient
+        ...partialRepoClient,
       };
     }
   }
 
   async initializeFieldContainerAsync() {
     this.ref.detectChanges();
-    await this.lfFieldContainerElement?.nativeElement?.initAsync(this.lfFieldsService);
+    await this.lfFieldContainerElement?.nativeElement?.initAsync(
+      this.lfFieldsService
+    );
   }
 
   async initializeTreeAsync() {
@@ -281,27 +338,35 @@ export class AppComponent implements AfterViewInit {
     let focusedNode: LfRepoTreeNode | undefined;
     if (this.lfSelectedFolder) {
       const repoId = await this.repoClient.getCurrentRepoId();
-      const focusNodeByPath = await this.repoClient.entriesClient.getEntryByPath({
-        repoId: repoId,
-        fullPath: this.lfSelectedFolder.selectedFolderPath
-      });
+      const focusNodeByPath =
+        await this.repoClient.entriesClient.getEntryByPath({
+          repoId: repoId,
+          fullPath: this.lfSelectedFolder.selectedFolderPath,
+        });
       const repoName = await this.repoClient.getCurrentRepoName();
       const focusedNodeEntry = focusNodeByPath?.entry;
       if (focusedNodeEntry) {
-        focusedNode = this.lfRepoTreeNodeService.createLfRepoTreeNode(focusedNodeEntry, repoName);
+        focusedNode = this.lfRepoTreeNodeService.createLfRepoTreeNode(
+          focusedNodeEntry,
+          repoName
+        );
       }
     }
-    await this.lfRepositoryBrowser?.nativeElement.initAsync(this.lfRepoTreeNodeService, focusedNode);
+    await this.lfRepositoryBrowser?.nativeElement.initAsync(
+      this.lfRepoTreeNodeService,
+      focusedNode
+    );
   }
 
   isNodeSelectable = (node: LfRepoTreeNode) => {
     if (node.entryType == EntryType.Folder) {
       return true;
-    }
-    else if (node.entryType == EntryType.Shortcut && node.targetType == EntryType.Folder) {
+    } else if (
+      node.entryType == EntryType.Shortcut &&
+      node.targetType == EntryType.Folder
+    ) {
       return true;
-    }
-    else {
+    } else {
       return false;
     }
   };
@@ -312,24 +377,34 @@ export class AppComponent implements AfterViewInit {
 
   // Tree event handler methods
   async onSelectFolder() {
-    const selectedNode = this.lfRepositoryBrowser.nativeElement.currentFolder as LfRepoTreeNode;
+    const selectedNode = this.lfRepositoryBrowser.nativeElement
+      .currentFolder as LfRepoTreeNode;
     let entryId = Number.parseInt(selectedNode.id, 10);
     const selectedFolderPath = selectedNode.path;
     if (selectedNode.entryType == EntryType.Shortcut) {
       entryId = selectedNode.targetId;
     }
-    const repoId = (await this.repoClient.getCurrentRepoId());
-    const waUrl = this.loginComponent.nativeElement.account_endpoints.webClientUrl;
+    const repoId = await this.repoClient.getCurrentRepoId();
+    const waUrl =
+      this.loginComponent.nativeElement.account_endpoints.webClientUrl;
     this.expandFolderBrowser = false;
     this.lfSelectedFolder = {
-      selectedNodeUrl: getEntryWebAccessUrl(entryId.toString(), repoId, waUrl, selectedNode.isContainer),
+      selectedNodeUrl: getEntryWebAccessUrl(
+        entryId.toString(),
+        repoId,
+        waUrl,
+        selectedNode.isContainer
+      ),
       selectedFolderName: this.getFolderNameText(entryId, selectedFolderPath),
-      selectedFolderPath: selectedFolderPath
+      selectedFolderPath: selectedFolderPath,
     };
   }
 
   get shouldShowSelect(): boolean {
-    return !this.shouldShowOpen && !!this.lfRepositoryBrowser?.nativeElement?.currentFolder;
+    return (
+      !this.shouldShowOpen &&
+      !!this.lfRepositoryBrowser?.nativeElement?.currentFolder
+    );
   }
 
   get shouldShowOpen(): boolean {
@@ -339,7 +414,8 @@ export class AppComponent implements AfterViewInit {
   onEntrySelected(event) {
     const customEvent = event as CustomEvent<LfTreeNode[]>;
     const treeNodesSelected: LfTreeNode[] = customEvent.detail;
-    this.entrySelected = treeNodesSelected?.length > 0 ? treeNodesSelected[0] : undefined;
+    this.entrySelected =
+      treeNodesSelected?.length > 0 ? treeNodesSelected[0] : undefined;
   }
 
   async onToolbarOptionSelected(event) {
@@ -356,46 +432,62 @@ export class AppComponent implements AfterViewInit {
 
   openEditColumnsDialog(): void {
     this.dialog.open(EditColumnsModalComponent, {
-      data: { columnsSelected: this.selectedColumns, allColumnOptions: this.allPossibleColumns, updateColumns: this.updateColumns.bind(this),},
+      data: {
+        columnsSelected: this.selectedColumns,
+        allColumnOptions: this.allPossibleColumns,
+        updateColumns: this.updateColumns.bind(this),
+      },
     });
   }
 
   async makeNewFolder(folderName: string) {
     if (folderName) {
       if (!this.lfRepositoryBrowser?.nativeElement?.currentFolder) {
-        throw new Error('repositoryBrowser has no currently opened folder.');
+        throw new Error(
+          this.localizationService.getString('NO_CURRENTLY_OPENED_FOLDER')
+        );
       }
-      await this.addNewFolderAsync(this.lfRepositoryBrowser?.nativeElement?.currentFolder, folderName);
+      await this.addNewFolderAsync(
+        this.lfRepositoryBrowser?.nativeElement?.currentFolder,
+        folderName
+      );
       await this.lfRepositoryBrowser?.nativeElement?.refreshAsync();
-    }
-    else {
-      throw new Error("didn't receive a folder name.");
+    } else {
+      throw new Error(
+        this.localizationService.getString('PLEASE_PROVIDE_FOLDER_NAME')
+      );
     }
   }
 
-  async addNewFolderAsync(parentNode: LfTreeNode, folderName: string): Promise<void> {
-    if (!this.repoClient){
+  async addNewFolderAsync(
+    parentNode: LfTreeNode,
+    folderName: string
+  ): Promise<void> {
+    if (!this.repoClient) {
       throw new Error('repoClient is undefined');
     }
-    type RequestParameters = { entryId: number; postEntryChildrenRequest: PostEntryChildrenRequest };
+    type RequestParameters = {
+      entryId: number;
+      postEntryChildrenRequest: PostEntryChildrenRequest;
+    };
 
-    const entryId = (parentNode as LfRepoTreeNode).targetId ?? parseInt( parentNode.id, 10);
-    const postEntryChildrenRequest: PostEntryChildrenRequest = new PostEntryChildrenRequest({
-      name: folderName,
-      entryType: PostEntryChildrenEntryType.Folder,
-    });
+    const entryId =
+      (parentNode as LfRepoTreeNode).targetId ?? parseInt(parentNode.id, 10);
+    const postEntryChildrenRequest: PostEntryChildrenRequest =
+      new PostEntryChildrenRequest({
+        name: folderName,
+        entryType: PostEntryChildrenEntryType.Folder,
+      });
     const requestParameters: RequestParameters = {
       entryId,
       postEntryChildrenRequest,
     };
     const repoId: string = await this.repoClient.getCurrentRepoId();
-    await this.repoClient?.entriesClient.createOrCopyEntry(
-      {
-        repoId,
-        entryId: requestParameters.entryId,
-        request: requestParameters.postEntryChildrenRequest
-      }
-    );
+    await this.repoClient?.entriesClient.createOrCopyEntry({
+      repoId,
+      entryId: requestParameters.entryId,
+      request: requestParameters.postEntryChildrenRequest,
+    });
   }
 
   updateColumns(columns: ColumnDef[]) {
@@ -409,34 +501,36 @@ export class AppComponent implements AfterViewInit {
 
   async onClickBrowse() {
     this.expandFolderBrowser = true;
-    this.lfRepoTreeNodeService.columnIds = this.allPossibleColumns.map(columnDef => columnDef.id);
+    this.lfRepoTreeNodeService.columnIds = this.allPossibleColumns.map(
+      (columnDef) => columnDef.id
+    );
     await this.initializeTreeAsync();
     this.setColumns(this.selectedColumns);
   }
 
   get selectedFolderDisplayName(): string {
-    const FOLDER_BROWSER_PLACEHOLDER = this.localizationService.getString('FOLDER_BROWSER_PLACEHOLDER');
-    return this.lfSelectedFolder?.selectedFolderName ?? FOLDER_BROWSER_PLACEHOLDER;
+    const FOLDER_BROWSER_PLACEHOLDER = this.localizationService.getString(
+      'FOLDER_BROWSER_PLACEHOLDER'
+    );
+    return (
+      this.lfSelectedFolder?.selectedFolderName ?? FOLDER_BROWSER_PLACEHOLDER
+    );
   }
-
 
   private getFolderNameText(entryId: number, path: string): string {
     if (path) {
       const displayPath: string = path;
       if (!entryId) {
         return displayPath;
-      }
-      else {
+      } else {
         const baseName: string = PathUtils.getLastPathSegment(displayPath);
         if (!baseName || baseName.length === 0) {
           return '\\';
-        }
-        else {
+        } else {
           return baseName;
         }
       }
-    }
-    else {
+    } else {
       return 'FOLDER_BROWSER_PLACEHOLDER';
     }
   }
@@ -487,23 +581,29 @@ export class AppComponent implements AfterViewInit {
   }
 
   async onClickSave() {
-    const valid = this.lfFieldContainerElement?.nativeElement?.forceValidation();
+    const valid =
+      this.lfFieldContainerElement?.nativeElement?.forceValidation();
     if (valid) {
       const fileNameWithExtension = this.fileName + '.' + this.fileExtension;
-      const edocBlob: FileParameter = { data: (this.fileSelected as Blob), fileName: fileNameWithExtension };
+      const edocBlob: FileParameter = {
+        data: this.fileSelected as Blob,
+        fileName: fileNameWithExtension,
+      };
 
       const metadataRequest = await this.createMetadataRequestAsync();
-      const entryRequest: PostEntryWithEdocMetadataRequest = new PostEntryWithEdocMetadataRequest({
-        metadata: metadataRequest.metadata,
-        template: metadataRequest.template
-      });
+      const entryRequest: PostEntryWithEdocMetadataRequest =
+        new PostEntryWithEdocMetadataRequest({
+          metadata: metadataRequest.metadata,
+          template: metadataRequest.template,
+        });
 
       try {
         const repoId = await this.repoClient.getCurrentRepoId();
-        const currentSelectedByPathResponse = await this.repoClient.entriesClient.getEntryByPath({
-          repoId,
-          fullPath: this.lfSelectedFolder.selectedFolderPath
-        });
+        const currentSelectedByPathResponse =
+          await this.repoClient.entriesClient.getEntryByPath({
+            repoId,
+            fullPath: this.lfSelectedFolder.selectedFolderPath,
+          });
         const currentSelectedEntry = currentSelectedByPathResponse.entry;
         let parentEntryId = currentSelectedEntry.id;
         if (currentSelectedEntry.entryType == EntryType.Shortcut) {
@@ -516,47 +616,63 @@ export class AppComponent implements AfterViewInit {
           fileName: this.fileName,
           autoRename: true,
           electronicDocument: edocBlob,
-          request: entryRequest
+          request: entryRequest,
         });
         window.alert('Successfully saved document to Laserfiche');
-      }
-      catch (err: any) {
+      } catch (err: any) {
         console.error(err);
-        window.alert(`${this.localizationService.getString('ERROR_SAVING')}: ${err.message}`);
-
+        window.alert(
+          `${this.localizationService.getString('ERROR_SAVING')}: ${
+            err.message
+          }`
+        );
       }
-    }
-    else {
+    } else {
       console.warn('metadata invalid');
       window.alert('One or more fields is invalid. Please fix and try again');
     }
   }
 
   private async createMetadataRequestAsync(): Promise<PostEntryWithEdocMetadataRequest> {
-    const fieldValues = this.lfFieldContainerElement?.nativeElement?.getFieldValues() ?? {};
-    const templateName = this.lfFieldContainerElement?.nativeElement?.getTemplateValue()?.name ?? '';
+    const fieldValues =
+      this.lfFieldContainerElement?.nativeElement?.getFieldValues() ?? {};
+    const templateName =
+      this.lfFieldContainerElement?.nativeElement?.getTemplateValue()?.name ??
+      '';
 
-    const formattedFieldValues: {
-      [key: string]: FieldToUpdate;
-    } | undefined = {};
+    const formattedFieldValues:
+      | {
+          [key: string]: FieldToUpdate;
+        }
+      | undefined = {};
 
     for (const key in fieldValues) {
       const value = fieldValues[key];
-      formattedFieldValues[key] = new FieldToUpdate({ ...value, values: value.values.map(val => new ValueToUpdate(val)) });
+      formattedFieldValues[key] = new FieldToUpdate({
+        ...value,
+        values: value.values.map((val) => new ValueToUpdate(val)),
+      });
     }
 
-    const requestMetadata: PostEntryWithEdocMetadataRequest = this.getPostEntryRequest(templateName, formattedFieldValues);
+    const requestMetadata: PostEntryWithEdocMetadataRequest =
+      this.getPostEntryRequest(templateName, formattedFieldValues);
     return requestMetadata;
   }
 
-  private getPostEntryRequest(templateName: string | undefined, allFields: {
-    [key: string]: FieldToUpdate;
-  } | undefined): PostEntryWithEdocMetadataRequest {
-    const entryRequest: PostEntryWithEdocMetadataRequest = new PostEntryWithEdocMetadataRequest({
-      metadata: new PutFieldValsRequest({
-        fields: allFields
-      })
-    });
+  private getPostEntryRequest(
+    templateName: string | undefined,
+    allFields:
+      | {
+          [key: string]: FieldToUpdate;
+        }
+      | undefined
+  ): PostEntryWithEdocMetadataRequest {
+    const entryRequest: PostEntryWithEdocMetadataRequest =
+      new PostEntryWithEdocMetadataRequest({
+        metadata: new PutFieldValsRequest({
+          fields: allFields,
+        }),
+      });
     if (templateName && templateName.length > 0) {
       entryRequest.template = templateName;
     }
@@ -566,7 +682,9 @@ export class AppComponent implements AfterViewInit {
   // localization helpers
 
   BROWSE = this.localizationService.getString('BROWSE');
-  FOLDER_BROWSER_PLACEHOLDER = this.localizationService.getString('FOLDER_BROWSER_PLACEHOLDER');
+  FOLDER_BROWSER_PLACEHOLDER = this.localizationService.getString(
+    'FOLDER_BROWSER_PLACEHOLDER'
+  );
   SAVE_TO_LASERFICHE = this.localizationService.getString('SAVE_TO_LASERFICHE');
   CLICK_TO_UPLOAD = this.localizationService.getString('CLICK_TO_UPLOAD');
   SELECTED_FOLDER = this.localizationService.getString('SELECTED_FOLDER');
@@ -574,5 +692,4 @@ export class AppComponent implements AfterViewInit {
   OPEN_IN_LASERFICHE = this.localizationService.getString('OPEN_IN_LASERFICHE');
   SELECT = this.localizationService.getString('SELECT');
   CANCEL = this.localizationService.getString('CANCEL');
-
 }
