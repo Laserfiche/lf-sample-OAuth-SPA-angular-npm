@@ -26,8 +26,10 @@ We welcome contributions and feedback. Please follow our [contributing guideline
 
 ## First Time Setup
 
-1. Create a new Single Page App in [devconsole](https://app.laserfiche.com/devconsole/apps) and add the authentication redirect URI (e.g.: <https://myapp.example.com/lf-sample-app/>) which is also the root page of this app.
+0. Clone the repo
+1. Create a new Single Page App in devconsole for [US](https://app.laserfiche.com/devconsole/apps), [Canada](https://app.laserfiche.ca/devconsole/apps), or [Europe](https://app.eu.laserfiche.com/devconsole/apps) (depending on your region) and add the authentication redirect URI (e.g.: <https://myapp.example.com/lf-sample-app/>) which is also the root page of this app.
    - Select required scope(s) needed to read and write to the repository in the 'Authentication' tab  ("repository.Read" and "repository.Write" ). Scopes are case-sensitive and space-delimited. 
+   - Note that in order to access the devconsole, your user account must have been given Developer Console Administrator Access Rights by an Account Administrator. Otherwise you will see a message along the lines of "You do not have permission to view the developer console."
 2. Open folder (containing package.json) with Visual Studio Code
 3. In `src/app/app.component.ts` update the REDIRECT_URI and CLIENT_ID with the app client_id and redirect_uri as registered in step 1. You only need to update HOST_NAME if you are not using cloud production (laserfiche.com).
 4. In VS Code, open a New Terminal window.
