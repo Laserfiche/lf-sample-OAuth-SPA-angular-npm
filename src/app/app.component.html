@@ -1,7 +1,7 @@
 <h2  class="lf-sample-app-title">Save to Laserfiche Sample Application</h2>
 <div class="lf-component-container lf-right-button">
-  <lf-login #loginComponent redirect_uri="{{REDIRECT_URI}}" scope="{{SCOPE}}"
-    authorize_url_host_name="{{HOST_NAME}}" redirect_behavior="Replace" client_id="{{CLIENT_ID}}"
+  <lf-login #loginComponent redirect_uri="{{config.REDIRECT_URI}}" scope="{{config.SCOPE}}"
+    authorize_url_host_name="{{config.HOST_NAME}}" redirect_behavior="Replace" client_id="{{config.CLIENT_ID}}"
     (loginCompleted)="onLoginCompletedAsync()" (logoutCompleted)="onLogoutCompleted()">
   </lf-login>
 </div>

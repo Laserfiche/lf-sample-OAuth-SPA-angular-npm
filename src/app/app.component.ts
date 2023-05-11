@@ -40,6 +40,7 @@ import { getEntryWebAccessUrl } from './lf-url-utils';
 import { MatDialog } from '@angular/material/dialog';
 import { NewFolderModalComponent } from './new-folder-modal/new-folder-modal.component';
 import { EditColumnsModalComponent } from './edit-columns-modal/edit-columns-modal.component';
+import config from './config';
 
 const resources: Map<string, object> = new Map<string, object>([
   [
@@ -79,10 +80,7 @@ interface ILfSelectedFolder {
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements AfterViewInit {
-  REDIRECT_URI: string = 'http://localhost/npm-sample-spa'; //'REPLACE_WITH_YOUR_REDIRECT_URI'; // i.e http://localhost:3000, https://serverName/lf-sample/index.html
-  CLIENT_ID: string = '6bd54321-2737-4a42-985d-abac41375af5'; //'REPLACE_WITH_YOUR_CLIENT_ID';
-  HOST_NAME: string = 'a.clouddev.laserfiche.com'; // only update this if you are using a different environment (i.e. a.clouddev.laserfiche.com)
-  SCOPE: string = 'repository.Read repository.Write'; // Scope(s) requested by the app
+  config = config;
 
   toolbarOptions: ToolbarOption[] = [
     {
@@ -267,7 +265,7 @@ export class AppComponent implements AfterViewInit {
         this.loginComponent.nativeElement.account_endpoints.regionalDomain;
       if (!regionalDomain) {
         console.log('could not get regionalDomain from loginComponent');
-        regionalDomain = this.HOST_NAME;
+        regionalDomain = config.HOST_NAME;
       }
       return { regionalDomain };
     } else {
