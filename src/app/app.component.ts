@@ -417,7 +417,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   async onToolbarOptionSelected(event) {
-    let customEvent = event as CustomEvent;
+    const customEvent = event as CustomEvent;
     await customEvent.detail.tag.handler();
   }
 
