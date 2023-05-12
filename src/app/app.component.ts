@@ -416,10 +416,8 @@ export class AppComponent implements AfterViewInit {
       treeNodesSelected?.length > 0 ? treeNodesSelected[0] : undefined;
   }
 
-  async onToolbarOptionSelected(event) {
-    const customEvent = event as CustomEvent<ToolbarOption>;
-    const optionSelected: ToolbarOption = customEvent.detail;
-    await optionSelected.tag.handler();
+  async onToolbarOptionSelected(event: CustomEvent) {
+    await event.detail.tag.handler();
   }
 
   openNewFolderDialog(): void {
