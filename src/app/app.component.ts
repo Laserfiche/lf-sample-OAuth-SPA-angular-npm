@@ -463,28 +463,14 @@ export class AppComponent implements AfterViewInit {
     if (!this.repoClient) {
       throw new Error('repoClient is undefined');
     }
-    type RequestParameters = {
-      entryId: number;
-      postEntryChildrenRequest: PostEntryChildrenRequest;
-    };
-
-    const entryId =
-      (parentNode as LfRepoTreeNode).targetId ?? parseInt(parentNode.id, 10);
-    const postEntryChildrenRequest: PostEntryChildrenRequest =
+    const entryId = (parentNode as LfRepoTreeNode).targetId ?? parseInt(parentNode.id, 10);
+    const request: PostEntryChildrenRequest =
       new PostEntryChildrenRequest({
         name: folderName,
         entryType: PostEntryChildrenEntryType.Folder,
       });
-    const requestParameters: RequestParameters = {
-      entryId,
-      postEntryChildrenRequest,
-    };
     const repoId: string = await this.repoClient.getCurrentRepoId();
-    await this.repoClient?.entriesClient.createOrCopyEntry({
-      repoId,
-      entryId: requestParameters.entryId,
-      request: requestParameters.postEntryChildrenRequest,
-    });
+    await this.repoClient?.entriesClient.createOrCopyEntry({repoId,entryId,request,});
   }
 
   updateColumns(columns: ColumnDef[]) {

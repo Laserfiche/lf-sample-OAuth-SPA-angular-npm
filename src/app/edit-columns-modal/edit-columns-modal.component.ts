@@ -29,7 +29,6 @@ interface EditColumnsDialogData {
   templateUrl: './edit-columns-modal.component.html',
   styleUrls: ['./edit-columns-modal.component.css']
 })
-
 export class EditColumnsModalComponent {
   localizationService: LfLocalizationService = new LfLocalizationService(resources);
 
