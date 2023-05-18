@@ -15,7 +15,7 @@ import { MatDialogModule } from '@angular/material/dialog';
   declarations: [
     AppComponent,
     NewFolderModalComponent,
-    EditColumnsModalComponent
+    EditColumnsModalComponent,
   ],
   imports: [
     BrowserModule,
@@ -28,6 +28,6 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatDialogModule,
   ],
   bootstrap: [AppComponent],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class AppModule { }
+export class AppModule {}

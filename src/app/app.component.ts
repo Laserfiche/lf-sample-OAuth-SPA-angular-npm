@@ -40,7 +40,7 @@ import { getEntryWebAccessUrl } from './lf-url-utils';
 import { MatDialog } from '@angular/material/dialog';
 import { NewFolderModalComponent } from './new-folder-modal/new-folder-modal.component';
 import { EditColumnsModalComponent } from './edit-columns-modal/edit-columns-modal.component';
-import config from './config';
+import config from '../config';
 
 const resources: Map<string, object> = new Map<string, object>([
   [
@@ -463,14 +463,18 @@ export class AppComponent implements AfterViewInit {
     if (!this.repoClient) {
       throw new Error('repoClient is undefined');
     }
-    const entryId = (parentNode as LfRepoTreeNode).targetId ?? parseInt(parentNode.id, 10);
-    const request: PostEntryChildrenRequest =
-      new PostEntryChildrenRequest({
-        name: folderName,
-        entryType: PostEntryChildrenEntryType.Folder,
-      });
+    const entryId =
+      (parentNode as LfRepoTreeNode).targetId ?? parseInt(parentNode.id, 10);
+    const request: PostEntryChildrenRequest = new PostEntryChildrenRequest({
+      name: folderName,
+      entryType: PostEntryChildrenEntryType.Folder,
+    });
     const repoId: string = await this.repoClient.getCurrentRepoId();
-    await this.repoClient?.entriesClient.createOrCopyEntry({repoId,entryId,request,});
+    await this.repoClient?.entriesClient.createOrCopyEntry({
+      repoId,
+      entryId,
+      request,
+    });
   }
 
   updateColumns(columns: ColumnDef[]) {

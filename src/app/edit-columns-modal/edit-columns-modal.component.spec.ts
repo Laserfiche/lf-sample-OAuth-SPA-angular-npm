@@ -8,9 +8,8 @@ describe('EditColumnsModalComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ EditColumnsModalComponent ]
-    })
-    .compileComponents();
+      declarations: [EditColumnsModalComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(EditColumnsModalComponent);
     component = fixture.componentInstance;

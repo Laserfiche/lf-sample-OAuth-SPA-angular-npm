@@ -1,19 +1,45 @@
 <div class="new-folder-dialog-modal">
-  <div class="new-folder-dialog-modal-content show" id="new-folder-dialog-content">
+  <div
+    class="new-folder-dialog-modal-content show"
+    id="new-folder-dialog-content"
+  >
     <div class="new-folder-dialog-modal-title">
-      <span class="lf-dialog-title lf-popup-dialog-title">{{NEW_FOLDER}}</span>
-      <button class="lf-close-button" id="new-folder-dialog-modal-close-dialog" (click)="closeDialog()">
-        <span id="new-folder-dialog-close-icon" class="material-icons">close</span>
+      <span class="lf-dialog-title lf-popup-dialog-title">{{
+        NEW_FOLDER
+      }}</span>
+      <button
+        class="lf-close-button"
+        id="new-folder-dialog-modal-close-dialog"
+        (click)="closeDialog()"
+      >
+        <span id="new-folder-dialog-close-icon" class="material-icons"
+          >close</span
+        >
       </button>
     </div>
     <div class="lf-dialog-message">
-      <p *ngIf="errorMessage" class="popup-error">{{errorMessage}}</p>
-      <p class="new-folder-label">{{NAME}}</p>
-          <input id="new-folder-name-input" class="new-folder-name-input" [(ngModel)] = "folderName">
+      <p *ngIf="errorMessage" class="popup-error">{{ errorMessage }}</p>
+      <p class="new-folder-label">{{ NAME }}</p>
+      <input
+        id="new-folder-name-input"
+        class="new-folder-name-input"
+        [(ngModel)]="folderName"
+      />
     </div>
     <div class="lf-dialog-actions">
-      <button (click)="closeDialog(folderName)" [disabled]="!(folderName?.length > 0)" class="lf-button primary-button">{{OK}}</button>
-      <button (click)="closeDialog()" class="lf-button sec-button margin-left-button">{{CANCEL}}</button>
+      <button
+        (click)="closeDialog(folderName)"
+        [disabled]="!(folderName?.length > 0)"
+        class="lf-button primary-button"
+      >
+        {{ OK }}
+      </button>
+      <button
+        (click)="closeDialog()"
+        class="lf-button sec-button margin-left-button"
+      >
+        {{ CANCEL }}
+      </button>
     </div>
   </div>
 </div>
