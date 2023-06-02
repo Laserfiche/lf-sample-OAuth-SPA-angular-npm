@@ -333,26 +333,9 @@ export class AppComponent implements AfterViewInit {
 
   async initializeTreeAsync() {
     this.ref.detectChanges();
-    let focusedNode: LfRepoTreeNode | undefined;
-    if (this.lfSelectedFolder) {
-      const repoId = await this.repoClient.getCurrentRepoId();
-      const focusNodeByPath =
-        await this.repoClient.entriesClient.getEntryByPath({
-          repoId: repoId,
-          fullPath: this.lfSelectedFolder.selectedFolderPath,
-        });
-      const repoName = await this.repoClient.getCurrentRepoName();
-      const focusedNodeEntry = focusNodeByPath?.entry;
-      if (focusedNodeEntry) {
-        focusedNode = this.lfRepoTreeNodeService.createLfRepoTreeNode(
-          focusedNodeEntry,
-          repoName
-        );
-      }
-    }
     await this.lfRepositoryBrowser?.nativeElement.initAsync(
       this.lfRepoTreeNodeService,
-      focusedNode
+      this.lfSelectedFolder?.selectedFolderPath
     );
   }
 
