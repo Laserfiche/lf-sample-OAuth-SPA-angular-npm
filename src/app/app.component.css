@@ -45,3 +45,13 @@ svg#close {
   display: flex;
   justify-content: flex-end;
 }
+
+.lf-folder-browser-sample-container {
+  position: relative;
+}
+
+.lf-toolbar {
+  position: absolute;
+  right: 0;
+  top: 0;
+}

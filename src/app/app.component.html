@@ -1,25 +1,54 @@
-<h2  class="lf-sample-app-title">Save to Laserfiche Sample Application</h2>
+<h2 class="lf-sample-app-title">Save to Laserfiche Sample Application</h2>
 <div class="lf-component-container lf-right-button">
-  <lf-login #loginComponent redirect_uri="{{REDIRECT_URI}}" scope="{{SCOPE}}"
-    authorize_url_host_name="{{HOST_NAME}}" redirect_behavior="Replace" client_id="{{CLIENT_ID}}"
-    (loginCompleted)="onLoginCompletedAsync()" (logoutCompleted)="onLogoutCompleted()">
+  <lf-login
+    #loginComponent
+    redirect_uri="{{ config.REDIRECT_URI }}"
+    scope="{{ config.SCOPE }}"
+    authorize_url_host_name="{{ config.HOST_NAME }}"
+    redirect_behavior="Replace"
+    client_id="{{ config.CLIENT_ID }}"
+    (loginCompleted)="onLoginCompletedAsync()"
+    (logoutCompleted)="onLogoutCompleted()"
+  >
   </lf-login>
 </div>
 <div *ngIf="isLoggedIn">
   <div class="folder-browse-select lf-component-container">
     <span>
-      {{FILE_NAME}}
-      <input [disabled]="fileSelected === undefined" type="text" [(ngModel)]="fileName">
-      .{{fileExtension}}
+      {{ FILE_NAME }}
+      <input
+        [disabled]="fileSelected === undefined"
+        type="text"
+        [(ngModel)]="fileName"
+      />
+      .{{ fileExtension }}
     </span>
     <div>
-      <button class="lf-button primary-button" (click)="onInputAreaClick()">Click to upload file</button>
-      <input type="file" #fileInput class="file_input_no_show" (change)="selectFileAsync()">
+      <button class="lf-button primary-button" (click)="onInputAreaClick()">
+        Click to upload file
+      </button>
+      <input
+        type="file"
+        #fileInput
+        class="file_input_no_show"
+        (change)="selectFileAsync()"
+      />
 
-      <button class="lf-multivalue-remove-button" [disabled]="!fileSelected" (click)="clearFileSelected()">
-        <svg id="close" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+      <button
+        class="lf-multivalue-remove-button"
+        [disabled]="!fileSelected"
+        (click)="clearFileSelected()"
+      >
+        <svg
+          id="close"
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+        >
           <path
-            d="M19 6.41l-1.41-1.41-5.59 5.59-5.59-5.59-1.41 1.41 5.59 5.59-5.59 5.59 1.41 1.41 5.59-5.59 5.59 5.59 1.41-1.41-5.59-5.59z" />
+            d="M19 6.41l-1.41-1.41-5.59 5.59-5.59-5.59-1.41 1.41 5.59 5.59-5.59 5.59 1.41 1.41 5.59-5.59 5.59 5.59 1.41-1.41-5.59-5.59z"
+          />
         </svg>
       </button>
     </div>
@@ -27,30 +56,70 @@
 
   <div class="lf-component-container">
     <div class="folder-browse-select">
-      {{SELECTED_FOLDER}}{{selectedFolderDisplayName}}
-      <button [hidden]="expandFolderBrowser" class="lf-button primary-button" (click)="onClickBrowse()">{{BROWSE}}</button>
+      {{ SELECTED_FOLDER }}{{ selectedFolderDisplayName }}
+      <button
+        [hidden]="expandFolderBrowser"
+        class="lf-button primary-button"
+        (click)="onClickBrowse()"
+      >
+        {{ BROWSE }}
+      </button>
     </div>
-    <a class="open-in-lf-link" *ngIf="lfSelectedFolder" href="{{lfSelectedFolder.selectedNodeUrl}}" target="_blank"
-      rel="noopener noreferrer">{{OPEN_IN_LASERFICHE}}</a>
+    <a
+      class="open-in-lf-link"
+      *ngIf="lfSelectedFolder"
+      href="{{ lfSelectedFolder.selectedNodeUrl }}"
+      target="_blank"
+      rel="noopener noreferrer"
+      >{{ OPEN_IN_LASERFICHE }}</a
+    >
     <div *ngIf="expandFolderBrowser" class="lf-folder-browser-sample-container">
-      <lf-repository-browser #lfRepositoryBrowser
-      multiple="false"
-      style="height: 450px"
-      [isSelectable]="isNodeSelectable"
-      (entrySelected)="onEntrySelected($event)"
-    ></lf-repository-browser>
-    <button class="lf-button primary-button"*ngIf="shouldShowOpen" (click)="onOpenNode()">Open</button>
-    <button class="lf-button primary-button" *ngIf="shouldShowSelect" (click)="onSelectFolder()">{{SELECT}}</button>
+      <lf-repository-browser
+        #lfRepositoryBrowser
+        multiple="false"
+        style="height: 450px"
+        [isSelectable]="isNodeSelectable"
+        (entrySelected)="onEntrySelected($event)"
+      ></lf-repository-browser>
+      <lf-toolbar
+        [dropdown_options]="toolbarOptions"
+        (optionSelected)="onToolbarOptionSelected($event)"
+        class="lf-toolbar"
+      ></lf-toolbar>
+      <button
+        class="lf-button primary-button"
+        *ngIf="shouldShowOpen"
+        (click)="onOpenNode()"
+      >
+        Open
+      </button>
+      <button
+        class="lf-button primary-button"
+        *ngIf="shouldShowSelect"
+        (click)="onSelectFolder()"
+      >
+        {{ SELECT }}
+      </button>
     </div>
   </div>
   <div class="lf-component-container">
-    <lf-field-container #lfFieldContainerElement [collapsible]="true" [startCollapsed]="true"
-      (dialogOpened)="adhocDialogOpened()" (dialogClosed)="adhocDialogClosed()">
+    <lf-field-container
+      #lfFieldContainerElement
+      [collapsible]="true"
+      [startCollapsed]="true"
+      (dialogOpened)="adhocDialogOpened()"
+      (dialogClosed)="adhocDialogClosed()"
+    >
     </lf-field-container>
   </div>
 
   <div class="lf-component-container lf-right-button">
-    <button class="lf-button primary-button" [disabled]="!enableSave" (click)="onClickSave()">{{SAVE_TO_LASERFICHE}}</button>
+    <button
+      class="lf-button primary-button"
+      [disabled]="!enableSave"
+      (click)="onClickSave()"
+    >
+      {{ SAVE_TO_LASERFICHE }}
+    </button>
   </div>
-
 </div>
