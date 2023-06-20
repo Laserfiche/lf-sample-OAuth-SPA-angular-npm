@@ -657,8 +657,8 @@ export class AppComponent implements AfterViewInit {
   );
   SAVE_TO_LASERFICHE = this.localizationService.getString('SAVE_TO_LASERFICHE');
   CLICK_TO_UPLOAD = this.localizationService.getString('CLICK_TO_UPLOAD');
-  SELECTED_FOLDER = this.localizationService.getString('SELECTED_FOLDER');
-  FILE_NAME = this.localizationService.getString('FILE_NAME');
+  SELECTED_FOLDER = this.localizationService.getString('SELECTED_FOLDER') + ' ';
+  FILE_NAME = this.localizationService.getString('FILE_NAME') + ' ';
   OPEN_IN_LASERFICHE = this.localizationService.getString('OPEN_IN_LASERFICHE');
   SELECT = this.localizationService.getString('SELECT');
   CANCEL = this.localizationService.getString('CANCEL');
