@@ -235,44 +235,6 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
-  private afterFetchResponseAsync = async (url, response, request) => {
-    if (response.status === 401) {
-      // this will initialize the login flow if refresh is unsuccessful
-      const refresh = await this.loginComponent.nativeElement.refreshTokenAsync(
-        true
-      );
-      if (refresh) {
-        request.headers['Authorization'] =
-          'Bearer ' +
-          this.loginComponent.nativeElement.authorization_credentials
-            .accessToken;
-        return true;
-      } else {
-        this.repoClient.clearCurrentRepo();
-        return false;
-      }
-    }
-    return false;
-  };
-
-  private beforeFetchRequestAsync = async (url, request) => {
-    // need to get accessToken each time
-    const accessToken =
-      this.loginComponent.nativeElement.authorization_credentials.accessToken;
-    if (accessToken) {
-      request.headers['Authorization'] = 'Bearer ' + accessToken;
-      let regionalDomain: string =
-        this.loginComponent.nativeElement.account_endpoints.regionalDomain;
-      if (!regionalDomain) {
-        console.log('could not get regionalDomain from loginComponent');
-        regionalDomain = config.HOST_NAME;
-      }
-      return { regionalDomain };
-    } else {
-      throw new Error('Access Token undefined.');
-    }
-  };
-
   private getCurrentRepo = async () => {
     const repos = await this.repoClient.repositoriesClient.getRepositoryList(
       {}
@@ -287,10 +249,7 @@ export class AppComponent implements AfterViewInit {
   async ensureRepoClientInitializedAsync(): Promise<void> {
     if (!this.repoClient) {
       const partialRepoClient: IRepositoryApiClient =
-        RepositoryApiClient.createFromHttpRequestHandler({
-          beforeFetchRequestAsync: this.beforeFetchRequestAsync,
-          afterFetchResponseAsync: this.afterFetchResponseAsync,
-        });
+        RepositoryApiClient.createFromHttpRequestHandler(this.loginComponent.nativeElement.authorizationRequestHandler);
 
       const clearCurrentRepo = () => {
         this.repoClient._repoId = undefined;
