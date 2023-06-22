@@ -1,11 +1,6 @@
 name: Veracode lf-sample-OAuth-SPA-angular-npm-CI
 
 on:
-  push:
-    branches: ['\d+.x']
-  pull_request:
-    branches: ['\d+.x']
-
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
   schedule:
@@ -23,12 +18,9 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v2.5.1
+        uses: actions/setup-node@v3
         with:
-          node-version: '14'
-
-      - name: Npm tool install
-        run: npm install -g npm@8
+          node-version: '16'
 
       - name: Npm ci
         run: npm ci
@@ -42,7 +34,7 @@ jobs:
       - name: 'Compress lf-sample-OAuth-SPA-angular-npm'
         run: tar -czvf ./veracode/lf-sample-OAuth-SPA-angular-npm.tar.gz ./dist
 
-      - name: Veracode Upload And Scan
+      - name: Veracode Upload And Scan (Static Application Security Testing)
         uses: veracode/veracode-uploadandscan-action@0.2.6
         with:
           appname: 'lf-sample-OAuth-SPA-angular-npm'
@@ -52,7 +44,7 @@ jobs:
           vkey: '${{ secrets.VERACODE_API_KEY }}'
           teams: 'Application Component - Shared'
 
-      - name: Run Veracode SCA
+      - name: Run Veracode Software Composition Analysis (SCA)
         env:
           SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
         uses: veracode/veracode-sca@v2.1.6
