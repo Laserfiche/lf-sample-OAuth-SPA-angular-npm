@@ -49,8 +49,8 @@ const resources: Map<string, object> = new Map<string, object>([
       FOLDER_BROWSER_PLACEHOLDER: 'No folder selected',
       SAVE_TO_LASERFICHE: 'Save to Laserfiche',
       CLICK_TO_UPLOAD: 'Click to upload file',
-      SELECTED_FOLDER: 'Selected Folder:',
-      FILE_NAME: 'File Name:',
+      SELECTED_FOLDER_COLON: 'Selected Folder:',
+      FILE_NAME_COLON: 'File Name:',
       BROWSE: 'Browse',
       OPEN_IN_LASERFICHE: 'Open in Laserfiche',
       SELECT: 'Select',
@@ -616,8 +616,8 @@ export class AppComponent implements AfterViewInit {
   );
   SAVE_TO_LASERFICHE = this.localizationService.getString('SAVE_TO_LASERFICHE');
   CLICK_TO_UPLOAD = this.localizationService.getString('CLICK_TO_UPLOAD');
-  SELECTED_FOLDER = this.localizationService.getString('SELECTED_FOLDER') + ' ';
-  FILE_NAME = this.localizationService.getString('FILE_NAME') + ' ';
+  SELECTED_FOLDER_COLON = this.localizationService.getString('SELECTED_FOLDER_COLON');
+  FILE_NAME_COLON = this.localizationService.getString('FILE_NAME_COLON');
   OPEN_IN_LASERFICHE = this.localizationService.getString('OPEN_IN_LASERFICHE');
   SELECT = this.localizationService.getString('SELECT');
   CANCEL = this.localizationService.getString('CANCEL');

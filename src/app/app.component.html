@@ -15,7 +15,7 @@
 <div *ngIf="isLoggedIn">
   <div class="folder-browse-select lf-component-container">
     <span>
-      {{ FILE_NAME }}
+      {{ FILE_NAME_COLON }}
       <input
         [disabled]="fileSelected === undefined"
         type="text"
@@ -56,7 +56,7 @@
 
   <div class="lf-component-container">
     <div class="folder-browse-select">
-      {{ SELECTED_FOLDER }}{{ selectedFolderDisplayName }}
+      {{ SELECTED_FOLDER_COLON }} {{ selectedFolderDisplayName }}
       <button
         [hidden]="expandFolderBrowser"
         class="lf-button primary-button"
