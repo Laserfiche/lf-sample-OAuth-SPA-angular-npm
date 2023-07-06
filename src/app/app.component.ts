@@ -49,8 +49,8 @@ const resources: Map<string, object> = new Map<string, object>([
       FOLDER_BROWSER_PLACEHOLDER: 'No folder selected',
       SAVE_TO_LASERFICHE: 'Save to Laserfiche',
       CLICK_TO_UPLOAD: 'Click to upload file',
-      SELECTED_FOLDER: 'Selected Folder: ',
-      FILE_NAME: 'File Name: ',
+      SELECTED_FOLDER_COLON: 'Selected Folder:',
+      FILE_NAME_COLON: 'File Name:',
       BROWSE: 'Browse',
       OPEN_IN_LASERFICHE: 'Open in Laserfiche',
       SELECT: 'Select',
@@ -235,44 +235,6 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
-  private afterFetchResponseAsync = async (url, response, request) => {
-    if (response.status === 401) {
-      // this will initialize the login flow if refresh is unsuccessful
-      const refresh = await this.loginComponent.nativeElement.refreshTokenAsync(
-        true
-      );
-      if (refresh) {
-        request.headers['Authorization'] =
-          'Bearer ' +
-          this.loginComponent.nativeElement.authorization_credentials
-            .accessToken;
-        return true;
-      } else {
-        this.repoClient.clearCurrentRepo();
-        return false;
-      }
-    }
-    return false;
-  };
-
-  private beforeFetchRequestAsync = async (url, request) => {
-    // need to get accessToken each time
-    const accessToken =
-      this.loginComponent.nativeElement.authorization_credentials.accessToken;
-    if (accessToken) {
-      request.headers['Authorization'] = 'Bearer ' + accessToken;
-      let regionalDomain: string =
-        this.loginComponent.nativeElement.account_endpoints.regionalDomain;
-      if (!regionalDomain) {
-        console.log('could not get regionalDomain from loginComponent');
-        regionalDomain = config.HOST_NAME;
-      }
-      return { regionalDomain };
-    } else {
-      throw new Error('Access Token undefined.');
-    }
-  };
-
   private getCurrentRepo = async () => {
     const repos = await this.repoClient.repositoriesClient.getRepositoryList(
       {}
@@ -287,10 +249,7 @@ export class AppComponent implements AfterViewInit {
   async ensureRepoClientInitializedAsync(): Promise<void> {
     if (!this.repoClient) {
       const partialRepoClient: IRepositoryApiClient =
-        RepositoryApiClient.createFromHttpRequestHandler({
-          beforeFetchRequestAsync: this.beforeFetchRequestAsync,
-          afterFetchResponseAsync: this.afterFetchResponseAsync,
-        });
+        RepositoryApiClient.createFromHttpRequestHandler(this.loginComponent.nativeElement.authorizationRequestHandler);
 
       const clearCurrentRepo = () => {
         this.repoClient._repoId = undefined;
@@ -657,8 +616,8 @@ export class AppComponent implements AfterViewInit {
   );
   SAVE_TO_LASERFICHE = this.localizationService.getString('SAVE_TO_LASERFICHE');
   CLICK_TO_UPLOAD = this.localizationService.getString('CLICK_TO_UPLOAD');
-  SELECTED_FOLDER = this.localizationService.getString('SELECTED_FOLDER');
-  FILE_NAME = this.localizationService.getString('FILE_NAME');
+  SELECTED_FOLDER_COLON = this.localizationService.getString('SELECTED_FOLDER_COLON');
+  FILE_NAME_COLON = this.localizationService.getString('FILE_NAME_COLON');
   OPEN_IN_LASERFICHE = this.localizationService.getString('OPEN_IN_LASERFICHE');
   SELECT = this.localizationService.getString('SELECT');
   CANCEL = this.localizationService.getString('CANCEL');
