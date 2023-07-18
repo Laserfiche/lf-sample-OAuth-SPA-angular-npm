@@ -164,13 +164,13 @@ export class AppComponent implements AfterViewInit {
   // repository client that will be used to connect to the LF API
   private repoClient?: IRepositoryApiClientExInternal;
   // used to get the file user is trying to save
-  @ViewChild('fileInput') fileInput: ElementRef<HTMLInputElement>;
+  @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
-  lfSelectedFolder: ILfSelectedFolder | undefined;
+  lfSelectedFolder?: ILfSelectedFolder;
 
   // the UI components
   @ViewChild('lfFieldContainerElement')
-  lfFieldContainerElement: ElementRef<LfFieldContainerComponent>;
+  lfFieldContainerElement?: ElementRef<LfFieldContainerComponent>;
   @ViewChild('loginComponent') loginComponent?: ElementRef<LfLoginComponent>;
   @ViewChild('lfRepositoryBrowser')
   lfRepositoryBrowser?: ElementRef<LfRepositoryBrowserComponent>;
@@ -183,12 +183,12 @@ export class AppComponent implements AfterViewInit {
   localizationService = new LfLocalizationService(resources);
 
   // determines if the folder browser should be expanded
-  expandFolderBrowser: boolean;
+  expandFolderBrowser = false;
 
   fileSelected?: File;
   fileName?: string;
   fileExtension?: string;
-  entrySelected: LfTreeNode;
+  entrySelected?: LfTreeNode;
 
   constructor(private ref: ChangeDetectorRef, public dialog: MatDialog) {}
 
@@ -198,7 +198,7 @@ export class AppComponent implements AfterViewInit {
     await this.initializeFieldContainerAsync();
   }
 
-  setColumns(columns) {
+  setColumns(columns: ColumnDef[]) {
     this.lfRepositoryBrowser?.nativeElement.setColumnsToDisplay(columns);
     this.selectedColumns = columns;
   }
@@ -209,7 +209,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   onLogoutCompleted() {
-    this.repoClient.clearCurrentRepo();
+    this.repoClient?.clearCurrentRepo();
   }
 
   private async getAndInitializeRepositoryClientAndServicesAsync() {
@@ -221,26 +221,28 @@ export class AppComponent implements AfterViewInit {
       await this.ensureRepoClientInitializedAsync();
 
       // create the tree service to interact with the LF Api
-      this.lfRepoTreeNodeService = new LfRepoTreeNodeService(this.repoClient);
-      // by default all entries are viewable
-      this.lfRepoTreeNodeService.viewableEntryTypes = [
-        EntryType.Folder,
-        EntryType.Shortcut,
-      ];
+      if (this.repoClient) {
+        this.lfRepoTreeNodeService = new LfRepoTreeNodeService(this.repoClient);
+        // by default all entries are viewable
+        this.lfRepoTreeNodeService.viewableEntryTypes = [
+          EntryType.Folder,
+          EntryType.Shortcut,
+        ];
+      }
 
       // create the fields service to let the field component interact with Laserfiche
-      this.lfFieldsService = new LfFieldsService(this.repoClient);
+      this.lfFieldsService = this.repoClient ? new LfFieldsService(this.repoClient) : undefined;
     } else {
       // user is not logged in
     }
   }
 
   private getCurrentRepo = async () => {
-    const repos = await this.repoClient.repositoriesClient.getRepositoryList(
+    const repos = await this.repoClient?.repositoriesClient.getRepositoryList(
       {}
     );
-    const repo = repos[0];
-    if (repo.repoId && repo.repoName) {
+    const repo = repos ? repos[0] : undefined;
+    if (repo?.repoId && repo?.repoName) {
       return { repoId: repo.repoId, repoName: repo.repoName };
     }
     throw new Error('Current repoId undefined.');
@@ -248,54 +250,66 @@ export class AppComponent implements AfterViewInit {
 
   async ensureRepoClientInitializedAsync(): Promise<void> {
     if (!this.repoClient) {
-      const partialRepoClient: IRepositoryApiClient =
-        RepositoryApiClient.createFromHttpRequestHandler(this.loginComponent.nativeElement.authorizationRequestHandler);
+      const partialRepoClient: IRepositoryApiClient | undefined = this.loginComponent ?
+        RepositoryApiClient.createFromHttpRequestHandler(this.loginComponent.nativeElement.authorizationRequestHandler): undefined;
 
       const clearCurrentRepo = () => {
-        this.repoClient._repoId = undefined;
-        this.repoClient._repoName = undefined;
+        if (this.repoClient){
+          this.repoClient._repoId = undefined;
+          this.repoClient._repoName = undefined;
+        }
         // TODO is there anything else to clear?
       };
-      this.repoClient = {
-        clearCurrentRepo,
-        _repoId: undefined,
-        _repoName: undefined,
-        getCurrentRepoId: async () => {
-          if (this.repoClient._repoId) {
-            return this.repoClient._repoId;
-          } else {
-            const repo = (await this.getCurrentRepo()).repoId;
-            this.repoClient._repoId = repo;
-            return repo;
-          }
-        },
-        getCurrentRepoName: async () => {
-          if (this.repoClient._repoName) {
-            return this.repoClient._repoName;
-          } else {
-            const repo = (await this.getCurrentRepo()).repoName;
-            this.repoClient._repoName = repo;
-            return repo;
-          }
-        },
-        ...partialRepoClient,
-      };
+      if (partialRepoClient) {
+        this.repoClient = {
+          clearCurrentRepo,
+          _repoId: undefined,
+          _repoName: undefined,
+          getCurrentRepoId:async () => {
+            if (this.repoClient?._repoId) {
+              return this.repoClient._repoId;
+            } else {
+              const repo = (await this.getCurrentRepo()).repoId;
+              if (this.repoClient) {
+                this.repoClient._repoId = repo;
+              }
+              return repo;
+            }
+          },
+          getCurrentRepoName: async () => {
+            if (this.repoClient?._repoName) {
+              return this.repoClient._repoName;
+            } else {
+              const repo = (await this.getCurrentRepo()).repoName;
+              if (this.repoClient) {
+                this.repoClient._repoName = repo;
+              }
+              return repo;
+            }
+          },
+          ...partialRepoClient
+        }
+      }
     }
   }
 
   async initializeFieldContainerAsync() {
     this.ref.detectChanges();
-    await this.lfFieldContainerElement?.nativeElement?.initAsync(
-      this.lfFieldsService
-    );
+    if (this.lfFieldsService) {
+      await this.lfFieldContainerElement?.nativeElement?.initAsync(
+        this.lfFieldsService
+      );
+    }
   }
 
   async initializeTreeAsync() {
     this.ref.detectChanges();
-    await this.lfRepositoryBrowser?.nativeElement.initAsync(
-      this.lfRepoTreeNodeService,
-      this.lfSelectedFolder?.selectedFolderPath
-    );
+    if (this.lfRepoTreeNodeService){
+      await this.lfRepositoryBrowser?.nativeElement.initAsync(
+        this.lfRepoTreeNodeService,
+        this.lfSelectedFolder?.selectedFolderPath
+      );
+    }
   }
 
   isNodeSelectable = (node: LfRepoTreeNode) => {
@@ -317,16 +331,16 @@ export class AppComponent implements AfterViewInit {
 
   // Tree event handler methods
   async onSelectFolder() {
-    const selectedNode = this.lfRepositoryBrowser.nativeElement
+    const selectedNode = this.lfRepositoryBrowser?.nativeElement
       .currentFolder as LfRepoTreeNode;
     let entryId = Number.parseInt(selectedNode.id, 10);
     const selectedFolderPath = selectedNode.path;
-    if (selectedNode.entryType == EntryType.Shortcut) {
+    if (selectedNode.entryType == EntryType.Shortcut && selectedNode.targetId) {
       entryId = selectedNode.targetId;
     }
-    const repoId = await this.repoClient.getCurrentRepoId();
+    const repoId = await this.repoClient?.getCurrentRepoId();
     const waUrl =
-      this.loginComponent.nativeElement.account_endpoints.webClientUrl;
+      this.loginComponent?.nativeElement.account_endpoints?.webClientUrl;
     this.expandFolderBrowser = false;
     this.lfSelectedFolder = {
       selectedNodeUrl: getEntryWebAccessUrl(
@@ -351,14 +365,14 @@ export class AppComponent implements AfterViewInit {
     return !!this.entrySelected;
   }
 
-  onEntrySelected(event) {
+  onEntrySelected(event: any) {
     const customEvent = event as CustomEvent<LfTreeNode[]>;
     const treeNodesSelected: LfTreeNode[] = customEvent.detail;
     this.entrySelected =
       treeNodesSelected?.length > 0 ? treeNodesSelected[0] : undefined;
   }
 
-  async onToolbarOptionSelected(event) {
+  async onToolbarOptionSelected(event: any) {
     const customEvent = event as CustomEvent<ToolbarOption>;
     await customEvent.detail.tag.handler();
   }
@@ -430,9 +444,11 @@ export class AppComponent implements AfterViewInit {
 
   async onClickBrowse() {
     this.expandFolderBrowser = true;
-    this.lfRepoTreeNodeService.columnIds = this.allPossibleColumns.map(
-      (columnDef) => columnDef.id
-    );
+    if (this.lfRepoTreeNodeService) {
+      this.lfRepoTreeNodeService.columnIds = this.allPossibleColumns.map(
+        (columnDef) => columnDef.id
+      );
+    }
     await this.initializeTreeAsync();
     this.setColumns(this.selectedColumns);
   }
@@ -483,18 +499,22 @@ export class AppComponent implements AfterViewInit {
 
   // input handler methods
   onInputAreaClick() {
-    this.fileInput.nativeElement.click();
+    this.fileInput?.nativeElement.click();
   }
 
   async selectFileAsync() {
-    const files = this.fileInput.nativeElement.files;
-    this.fileSelected = files.item(0);
-    this.fileName = PathUtils.removeFileExtension(this.fileSelected.name);
-    this.fileExtension = PathUtils.getFileExtension(this.fileSelected.name);
+    const files = this.fileInput?.nativeElement.files;
+    this.fileSelected = files?.item(0) ?? undefined;
+    if (this.fileSelected?.name){
+      this.fileName = PathUtils.removeFileExtension(this.fileSelected.name);
+      this.fileExtension = PathUtils.getFileExtension(this.fileSelected.name);
+    }
   }
 
   clearFileSelected() {
-    this.fileInput.nativeElement.files = undefined;
+    if (this.fileInput){
+      this.fileInput.nativeElement.files = null;
+    }
     this.fileSelected = undefined;
     this.fileName = undefined;
     this.fileExtension = undefined;
@@ -527,17 +547,32 @@ export class AppComponent implements AfterViewInit {
         });
 
       try {
-        const repoId = await this.repoClient.getCurrentRepoId();
+        if(this.repoClient == undefined) {
+          throw new Error('repoClient was undefined');
+        }
+        const repoId = await this.repoClient?.getCurrentRepoId() ?? '';
+        if (this.lfSelectedFolder === undefined) {
+          throw new Error('selectedFolder was undefined');
+        }
         const currentSelectedByPathResponse =
           await this.repoClient.entriesClient.getEntryByPath({
             repoId,
             fullPath: this.lfSelectedFolder.selectedFolderPath,
           });
         const currentSelectedEntry = currentSelectedByPathResponse.entry;
+        if (currentSelectedEntry === undefined) {
+          throw new Error('currentSelectedEntry was undefined');
+        }
         let parentEntryId = currentSelectedEntry.id;
         if (currentSelectedEntry.entryType == EntryType.Shortcut) {
           const shortcut = currentSelectedEntry as Shortcut;
           parentEntryId = shortcut.targetId;
+        }
+        if (parentEntryId === undefined) {
+          throw new Error('parentEntryId was undefined');
+        }
+        if (this.fileName === undefined) {
+          throw new Error('fileName was undefined');
         }
         await this.repoClient.entriesClient.importDocument({
           repoId,
@@ -579,7 +614,7 @@ export class AppComponent implements AfterViewInit {
       const value = fieldValues[key];
       formattedFieldValues[key] = new FieldToUpdate({
         ...value,
-        values: value.values.map((val) => new ValueToUpdate(val)),
+        values: (value.values ?? []).map((val) => new ValueToUpdate(val)),
       });
     }
 
