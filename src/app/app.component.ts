@@ -508,7 +508,11 @@ export class AppComponent implements AfterViewInit {
 
   // input handler methods
   onInputAreaClick() {
-    this.fileInput?.nativeElement.click();
+    if (this.fileInput) {
+      this.fileInput.nativeElement.click();
+    }else {
+      console.error("file input undefined");
+    }
   }
 
   async selectFileAsync() {
@@ -556,42 +560,7 @@ export class AppComponent implements AfterViewInit {
         });
 
       try {
-        if(this.repoClient == undefined) {
-          throw new Error('repoClient was undefined');
-        }
-        const repoId = await this.repoClient?.getCurrentRepoId() ?? '';
-        if (this.lfSelectedFolder === undefined) {
-          throw new Error('selectedFolder was undefined');
-        }
-        const currentSelectedByPathResponse =
-          await this.repoClient.entriesClient.getEntryByPath({
-            repoId,
-            fullPath: this.lfSelectedFolder.selectedFolderPath,
-          });
-        const currentSelectedEntry = currentSelectedByPathResponse.entry;
-        if (currentSelectedEntry === undefined) {
-          throw new Error('currentSelectedEntry was undefined');
-        }
-        let parentEntryId = currentSelectedEntry.id;
-        if (currentSelectedEntry.entryType == EntryType.Shortcut) {
-          const shortcut = currentSelectedEntry as Shortcut;
-          parentEntryId = shortcut.targetId;
-        }
-        if (parentEntryId === undefined) {
-          throw new Error('parentEntryId was undefined');
-        }
-        if (this.fileName === undefined) {
-          throw new Error('fileName was undefined');
-        }
-        await this.repoClient.entriesClient.importDocument({
-          repoId,
-          parentEntryId,
-          fileName: this.fileName,
-          autoRename: true,
-          electronicDocument: edocBlob,
-          request: entryRequest,
-        });
-        window.alert('Successfully saved document to Laserfiche');
+        await this.trySaveDocument(edocBlob, entryRequest);
       } catch (err: any) {
         console.error(err);
         window.alert(
@@ -604,6 +573,45 @@ export class AppComponent implements AfterViewInit {
       console.warn('metadata invalid');
       window.alert('One or more fields is invalid. Please fix and try again');
     }
+  }
+
+  private async trySaveDocument(edocBlob: FileParameter, entryRequest: PostEntryWithEdocMetadataRequest) {
+    if(this.repoClient == undefined) {
+      throw new Error('repoClient was undefined');
+    }
+    const repoId = await this.repoClient.getCurrentRepoId();
+    if (this.lfSelectedFolder === undefined) {
+      throw new Error('selectedFolder was undefined');
+    }
+    const currentSelectedByPathResponse =
+      await this.repoClient.entriesClient.getEntryByPath({
+        repoId,
+        fullPath: this.lfSelectedFolder.selectedFolderPath,
+      });
+    const currentSelectedEntry = currentSelectedByPathResponse.entry;
+    if (currentSelectedEntry === undefined) {
+      throw new Error('currentSelectedEntry was undefined');
+    }
+    let parentEntryId = currentSelectedEntry.id;
+    if (currentSelectedEntry.entryType == EntryType.Shortcut) {
+      const shortcut = currentSelectedEntry as Shortcut;
+      parentEntryId = shortcut.targetId;
+    }
+    if (parentEntryId === undefined) {
+      throw new Error('parentEntryId was undefined');
+    }
+    if (this.fileName === undefined) {
+      throw new Error('fileName was undefined');
+    }
+    await this.repoClient.entriesClient.importDocument({
+      repoId,
+      parentEntryId,
+      fileName: this.fileName,
+      autoRename: true,
+      electronicDocument: edocBlob,
+      request: entryRequest,
+    });
+    window.alert('Successfully saved document to Laserfiche');
   }
 
   private async createMetadataRequestAsync(): Promise<PostEntryWithEdocMetadataRequest> {
