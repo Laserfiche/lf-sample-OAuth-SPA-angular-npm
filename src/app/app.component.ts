@@ -253,10 +253,10 @@ export class AppComponent implements AfterViewInit {
   async tryInitRepoClientAsync(): Promise<IRepositoryApiClientExInternal | undefined> {
     if (this.loginComponent){
       const repoClient =  await this.makeRepoClientFromLoginComponent(this.loginComponent.nativeElement);
-      return repoClient
+      return repoClient;
     } else {
       console.log('failed to initialize repo client from login component');
-      return undefined
+      return undefined;
     }
   }
 
@@ -295,7 +295,7 @@ export class AppComponent implements AfterViewInit {
           }
         },
         ...partialRepoClient
-    }
+    };
   }
 
   async initializeFieldContainerAsync() {
