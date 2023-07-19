@@ -3,9 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
-  QueryList,
   ViewChild,
-  ViewChildren,
 } from '@angular/core';
 import {
   PostEntryWithEdocMetadataRequest,
