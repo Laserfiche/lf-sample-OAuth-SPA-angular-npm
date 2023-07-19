@@ -218,20 +218,22 @@ export class AppComponent implements AfterViewInit {
       this.loginComponent?.nativeElement?.authorization_credentials
         ?.accessToken;
     if (accessToken) {
-      await this.ensureRepoClientInitializedAsync();
-
-      // create the tree service to interact with the LF Api
+      if (!this.repoClient) {
+        this.repoClient = await this.tryInitRepoClientAsync();
+      }
       if (this.repoClient) {
+        // create the tree service to interact with the LF Api
         this.lfRepoTreeNodeService = new LfRepoTreeNodeService(this.repoClient);
         // by default all entries are viewable
         this.lfRepoTreeNodeService.viewableEntryTypes = [
           EntryType.Folder,
           EntryType.Shortcut,
         ];
+        // create the fields service to let the field component interact with Laserfiche
+        this.lfFieldsService = new LfFieldsService(this.repoClient);
+      } else {
+        // failed to initialize repo client
       }
-
-      // create the fields service to let the field component interact with Laserfiche
-      this.lfFieldsService = this.repoClient ? new LfFieldsService(this.repoClient) : undefined;
     } else {
       // user is not logged in
     }
@@ -245,51 +247,54 @@ export class AppComponent implements AfterViewInit {
     if (repo?.repoId && repo?.repoName) {
       return { repoId: repo.repoId, repoName: repo.repoName };
     }
-    throw new Error('Current repoId undefined.');
+    throw new Error('Current repo id or name undefined.');
   };
 
-  async ensureRepoClientInitializedAsync(): Promise<void> {
-    if (!this.repoClient) {
-      const partialRepoClient: IRepositoryApiClient | undefined = this.loginComponent ?
-        RepositoryApiClient.createFromHttpRequestHandler(this.loginComponent.nativeElement.authorizationRequestHandler): undefined;
+  async tryInitRepoClientAsync(): Promise<IRepositoryApiClientExInternal | undefined> {
+    if (this.loginComponent){
+      const repoClient =  await this.makeRepoClientFromLoginComponent(this.loginComponent.nativeElement);
+      return repoClient
+    } else {
+      console.log('failed to initialize repo client from login component');
+      return undefined
+    }
+  }
 
+  private async makeRepoClientFromLoginComponent(loginComponent: LfLoginComponent): Promise<IRepositoryApiClientExInternal>{
+    const partialRepoClient: IRepositoryApiClient = RepositoryApiClient.createFromHttpRequestHandler(loginComponent.authorizationRequestHandler);
       const clearCurrentRepo = () => {
         if (this.repoClient){
           this.repoClient._repoId = undefined;
           this.repoClient._repoName = undefined;
         }
-        // TODO is there anything else to clear?
       };
-      if (partialRepoClient) {
-        this.repoClient = {
-          clearCurrentRepo,
-          _repoId: undefined,
-          _repoName: undefined,
-          getCurrentRepoId:async () => {
-            if (this.repoClient?._repoId) {
-              return this.repoClient._repoId;
-            } else {
-              const repo = (await this.getCurrentRepo()).repoId;
-              if (this.repoClient) {
-                this.repoClient._repoId = repo;
-              }
-              return repo;
+      return {
+        clearCurrentRepo,
+        _repoId: undefined,
+        _repoName: undefined,
+        getCurrentRepoId:async () => {
+          if (this.repoClient?._repoId) {
+            return this.repoClient._repoId;
+          } else {
+            const repo = (await this.getCurrentRepo()).repoId;
+            if (this.repoClient) {
+              this.repoClient._repoId = repo;
             }
-          },
-          getCurrentRepoName: async () => {
-            if (this.repoClient?._repoName) {
-              return this.repoClient._repoName;
-            } else {
-              const repo = (await this.getCurrentRepo()).repoName;
-              if (this.repoClient) {
-                this.repoClient._repoName = repo;
-              }
-              return repo;
+            return repo;
+          }
+        },
+        getCurrentRepoName: async () => {
+          if (this.repoClient?._repoName) {
+            return this.repoClient._repoName;
+          } else {
+            const repo = (await this.getCurrentRepo()).repoName;
+            if (this.repoClient) {
+              this.repoClient._repoName = repo;
             }
-          },
-          ...partialRepoClient
-        }
-      }
+            return repo;
+          }
+        },
+        ...partialRepoClient
     }
   }
 
@@ -331,27 +336,31 @@ export class AppComponent implements AfterViewInit {
 
   // Tree event handler methods
   async onSelectFolder() {
-    const selectedNode = this.lfRepositoryBrowser?.nativeElement
+    if(this.lfRepositoryBrowser && this.repoClient && this.loginComponent && this.loginComponent.nativeElement.account_endpoints){
+      const selectedNode = this.lfRepositoryBrowser.nativeElement
       .currentFolder as LfRepoTreeNode;
-    let entryId = Number.parseInt(selectedNode.id, 10);
-    const selectedFolderPath = selectedNode.path;
-    if (selectedNode.entryType == EntryType.Shortcut && selectedNode.targetId) {
-      entryId = selectedNode.targetId;
+      let entryId = Number.parseInt(selectedNode.id, 10);
+      const selectedFolderPath = selectedNode.path;
+      if (selectedNode.entryType == EntryType.Shortcut && selectedNode.targetId) {
+        entryId = selectedNode.targetId;
+      }
+      const repoId = await this.repoClient.getCurrentRepoId();
+      const waUrl =
+        this.loginComponent.nativeElement.account_endpoints.webClientUrl;
+      this.expandFolderBrowser = false;
+      this.lfSelectedFolder = {
+        selectedNodeUrl: getEntryWebAccessUrl(
+          entryId.toString(),
+          repoId,
+          waUrl,
+          selectedNode.isContainer
+        ) ?? '',
+        selectedFolderName: this.getFolderNameText(entryId, selectedFolderPath),
+        selectedFolderPath: selectedFolderPath,
+      };
+    } else {
+      console.error("could not set lfSelectedFolder: some of {lfRepositoryBrowser, repoClient,loginComponent, account_endpoints} were not defined");
     }
-    const repoId = await this.repoClient?.getCurrentRepoId();
-    const waUrl =
-      this.loginComponent?.nativeElement.account_endpoints?.webClientUrl;
-    this.expandFolderBrowser = false;
-    this.lfSelectedFolder = {
-      selectedNodeUrl: getEntryWebAccessUrl(
-        entryId.toString(),
-        repoId,
-        waUrl,
-        selectedNode.isContainer
-      ),
-      selectedFolderName: this.getFolderNameText(entryId, selectedFolderPath),
-      selectedFolderPath: selectedFolderPath,
-    };
   }
 
   get shouldShowSelect(): boolean {
