@@ -336,7 +336,7 @@ export class AppComponent implements AfterViewInit {
   async onSelectFolder() {
     if(this.lfRepositoryBrowser && this.repoClient && this.loginComponent && this.loginComponent.nativeElement.account_endpoints){
       const selectedNode = this.lfRepositoryBrowser.nativeElement
-      .currentFolder as LfRepoTreeNode;
+        .currentFolder as LfRepoTreeNode;
       let entryId = Number.parseInt(selectedNode.id, 10);
       const selectedFolderPath = selectedNode.path;
       if (selectedNode.entryType == EntryType.Shortcut && selectedNode.targetId) {
