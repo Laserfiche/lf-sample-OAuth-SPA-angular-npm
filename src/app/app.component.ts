@@ -496,11 +496,10 @@ export class AppComponent implements AfterViewInit {
 
   // input handler methods
   onInputAreaClick() {
-    if (this.fileInput) {
-      this.fileInput.nativeElement.click();
-    }else {
-      console.error("file input undefined");
+    if (!this.fileInput) {
+      throw new Error("file input undefined");
     }
+    this.fileInput.nativeElement.click();
   }
 
   async selectFileAsync() {
@@ -564,20 +563,23 @@ export class AppComponent implements AfterViewInit {
   }
 
   private async trySaveDocument(edocBlob: FileParameter, entryRequest: PostEntryWithEdocMetadataRequest) {
-    if(this.repoClient == undefined) {
+    if(!this.repoClient) {
       throw new Error('repoClient was undefined');
     }
-    const repoId = await this.repoClient.getCurrentRepoId();
-    if (this.lfSelectedFolder === undefined) {
+    if (!this.lfSelectedFolder) {
       throw new Error('selectedFolder was undefined');
     }
+    if (!this.fileName) {
+      throw new Error('fileName was undefined');
+    }
+    const repoId = await this.repoClient.getCurrentRepoId();
     const currentSelectedByPathResponse =
       await this.repoClient.entriesClient.getEntryByPath({
         repoId,
         fullPath: this.lfSelectedFolder.selectedFolderPath,
       });
     const currentSelectedEntry = currentSelectedByPathResponse.entry;
-    if (currentSelectedEntry === undefined) {
+    if (!currentSelectedEntry) {
       throw new Error('currentSelectedEntry was undefined');
     }
     let parentEntryId = currentSelectedEntry.id;
@@ -585,11 +587,8 @@ export class AppComponent implements AfterViewInit {
       const shortcut = currentSelectedEntry as Shortcut;
       parentEntryId = shortcut.targetId;
     }
-    if (parentEntryId === undefined) {
+    if (!parentEntryId) {
       throw new Error('parentEntryId was undefined');
-    }
-    if (this.fileName === undefined) {
-      throw new Error('fileName was undefined');
     }
     await this.repoClient.entriesClient.importDocument({
       repoId,
