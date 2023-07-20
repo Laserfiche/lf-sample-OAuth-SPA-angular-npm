@@ -207,7 +207,10 @@ export class AppComponent implements AfterViewInit {
   }
 
   onLogoutCompleted() {
-    this.repoClient?.clearCurrentRepo();
+    if(!this.repoClient){
+      throw new Error('repoClient is undefined');
+    }
+    this.repoClient.clearCurrentRepo();
   }
 
   private async getAndInitializeRepositoryClientAndServicesAsync() {
@@ -219,81 +222,69 @@ export class AppComponent implements AfterViewInit {
       if (!this.repoClient) {
         this.repoClient = await this.tryInitRepoClientAsync();
       }
-      if (this.repoClient) {
-        // create the tree service to interact with the LF Api
-        this.lfRepoTreeNodeService = new LfRepoTreeNodeService(this.repoClient);
-        // by default all entries are viewable
-        this.lfRepoTreeNodeService.viewableEntryTypes = [
-          EntryType.Folder,
-          EntryType.Shortcut,
-        ];
-        // create the fields service to let the field component interact with Laserfiche
-        this.lfFieldsService = new LfFieldsService(this.repoClient);
-      } else {
-        // failed to initialize repo client
-      }
+      // create the tree service to interact with the LF Api
+      this.lfRepoTreeNodeService = new LfRepoTreeNodeService(this.repoClient);
+      // by default all entries are viewable
+      this.lfRepoTreeNodeService.viewableEntryTypes = [
+        EntryType.Folder,
+        EntryType.Shortcut,
+      ];
+      // create the fields service to let the field component interact with Laserfiche
+      this.lfFieldsService = new LfFieldsService(this.repoClient);
     } else {
       // user is not logged in
     }
   }
 
-  private getCurrentRepo = async () => {
-    const repos = await this.repoClient?.repositoriesClient.getRepositoryList(
-      {}
-    );
-    const repo = repos ? repos[0] : undefined;
-    if (repo?.repoId && repo?.repoName) {
-      return { repoId: repo.repoId, repoName: repo.repoName };
+  async tryInitRepoClientAsync(): Promise<IRepositoryApiClientExInternal> {
+    if (!this.loginComponent){
+      throw new Error("Login Component is undefined");
     }
-    throw new Error('Current repo id or name undefined.');
-  };
-
-  async tryInitRepoClientAsync(): Promise<IRepositoryApiClientExInternal | undefined> {
-    if (this.loginComponent){
-      const repoClient =  await this.makeRepoClientFromLoginComponent(this.loginComponent.nativeElement);
-      return repoClient;
-    } else {
-      console.log('failed to initialize repo client from login component');
-      return undefined;
-    }
+    const repoClient =  await this.makeRepoClientFromLoginComponent(this.loginComponent.nativeElement);
+    return repoClient;
   }
 
   private async makeRepoClientFromLoginComponent(loginComponent: LfLoginComponent): Promise<IRepositoryApiClientExInternal>{
     const partialRepoClient: IRepositoryApiClient = RepositoryApiClient.createFromHttpRequestHandler(loginComponent.authorizationRequestHandler);
-      const clearCurrentRepo = () => {
-        if (this.repoClient){
-          this.repoClient._repoId = undefined;
-          this.repoClient._repoName = undefined;
-        }
-      };
-      return {
-        clearCurrentRepo,
-        _repoId: undefined,
-        _repoName: undefined,
-        getCurrentRepoId:async () => {
-          if (this.repoClient?._repoId) {
-            return this.repoClient._repoId;
-          } else {
-            const repo = (await this.getCurrentRepo()).repoId;
-            if (this.repoClient) {
-              this.repoClient._repoId = repo;
-            }
-            return repo;
-          }
-        },
-        getCurrentRepoName: async () => {
-          if (this.repoClient?._repoName) {
-            return this.repoClient._repoName;
-          } else {
-            const repo = (await this.getCurrentRepo()).repoName;
-            if (this.repoClient) {
-              this.repoClient._repoName = repo;
-            }
-            return repo;
-          }
-        },
-        ...partialRepoClient
+
+    const getCurrentRepo = async (repoClient: IRepositoryApiClientExInternal) => {
+      const repos = await repoClient.repositoriesClient.getRepositoryList(
+        {}
+      );
+      const repo = repos ? repos[0] : undefined;
+      if (repo?.repoId && repo?.repoName) {
+        return { repoId: repo.repoId, repoName: repo.repoName };
+      }
+      throw new Error('Current repo id or name undefined.');
     };
+    const repoClient: IRepositoryApiClientExInternal = {
+      _repoId: undefined,
+      _repoName: undefined,
+      clearCurrentRepo: function (): void {
+          repoClient._repoId = undefined;
+          repoClient._repoName = undefined;
+        },
+      getCurrentRepoId: async function(): Promise<string> {
+        if (repoClient._repoId) {
+          return repoClient._repoId;
+        } else {
+          const repoId = (await getCurrentRepo(repoClient)).repoId;
+          repoClient._repoId = repoId;
+          return repoId;
+        }
+      },
+      getCurrentRepoName: async function (): Promise<string> {
+        if (repoClient._repoName) {
+          return repoClient._repoName;
+        } else {
+          const repoName = (await getCurrentRepo(repoClient)).repoName;
+          repoClient._repoName = repoName;
+          return repoName;
+        }
+      },
+      ...partialRepoClient
+    };
+    return repoClient;
   }
 
   async initializeFieldContainerAsync() {
