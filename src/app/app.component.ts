@@ -325,31 +325,30 @@ export class AppComponent implements AfterViewInit {
 
   // Tree event handler methods
   async onSelectFolder() {
-    if(this.lfRepositoryBrowser && this.repoClient && this.loginComponent && this.loginComponent.nativeElement.account_endpoints){
-      const selectedNode = this.lfRepositoryBrowser.nativeElement
-        .currentFolder as LfRepoTreeNode;
-      let entryId = Number.parseInt(selectedNode.id, 10);
-      const selectedFolderPath = selectedNode.path;
-      if (selectedNode.entryType == EntryType.Shortcut && selectedNode.targetId) {
-        entryId = selectedNode.targetId;
-      }
-      const repoId = await this.repoClient.getCurrentRepoId();
-      const waUrl =
-        this.loginComponent.nativeElement.account_endpoints.webClientUrl;
-      this.expandFolderBrowser = false;
-      this.lfSelectedFolder = {
-        selectedNodeUrl: getEntryWebAccessUrl(
-          entryId.toString(),
-          repoId,
-          waUrl,
-          selectedNode.isContainer
-        ) ?? '',
-        selectedFolderName: this.getFolderNameText(entryId, selectedFolderPath),
-        selectedFolderPath: selectedFolderPath,
-      };
-    } else {
-      console.error("could not set lfSelectedFolder: some of {lfRepositoryBrowser, repoClient,loginComponent, account_endpoints} were not defined");
+    if(!this.lfRepositoryBrowser || !this.repoClient || !this.loginComponent || !this.loginComponent.nativeElement.account_endpoints){
+      throw new Error("Could not set lfSelectedFolder: some of {lfRepositoryBrowser, repoClient, loginComponent, account_endpoints} were undefined");
     }
+    const selectedNode = this.lfRepositoryBrowser.nativeElement
+      .currentFolder as LfRepoTreeNode;
+    let entryId = Number.parseInt(selectedNode.id, 10);
+    const selectedFolderPath = selectedNode.path;
+    if (selectedNode.entryType == EntryType.Shortcut && selectedNode.targetId) {
+      entryId = selectedNode.targetId;
+    }
+    const repoId = await this.repoClient.getCurrentRepoId();
+    const waUrl =
+      this.loginComponent.nativeElement.account_endpoints.webClientUrl;
+    this.expandFolderBrowser = false;
+    this.lfSelectedFolder = {
+      selectedNodeUrl: getEntryWebAccessUrl(
+        entryId.toString(),
+        repoId,
+        waUrl,
+        selectedNode.isContainer
+      ) ?? '',
+      selectedFolderName: this.getFolderNameText(entryId, selectedFolderPath),
+      selectedFolderPath: selectedFolderPath,
+    };
   }
 
   get shouldShowSelect(): boolean {
@@ -363,14 +362,14 @@ export class AppComponent implements AfterViewInit {
     return !!this.entrySelected;
   }
 
-  onEntrySelected(event: any) {
+  onEntrySelected(event: Event) {
     const customEvent = event as CustomEvent<LfTreeNode[]>;
     const treeNodesSelected: LfTreeNode[] = customEvent.detail;
     this.entrySelected =
       treeNodesSelected?.length > 0 ? treeNodesSelected[0] : undefined;
   }
 
-  async onToolbarOptionSelected(event: any) {
+  async onToolbarOptionSelected(event: Event) {
     const customEvent = event as CustomEvent<ToolbarOption>;
     await customEvent.detail.tag.handler();
   }
