@@ -29,7 +29,7 @@
     <div class="lf-dialog-actions">
       <button
         (click)="closeDialog(folderName)"
-        [disabled]="!(folderName?.length > 0)"
+        [disabled]="folderName ? folderName.length === 0 : true"
         class="lf-button primary-button"
       >
         {{ OK }}
