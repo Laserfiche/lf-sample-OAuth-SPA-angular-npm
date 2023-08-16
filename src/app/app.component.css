@@ -56,3 +56,8 @@ svg#close {
   top: 0;
 }
 
+.dropdown-signin-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; 
+}

@@ -79,10 +79,12 @@ interface ILfSelectedFolder {
 })
 export class AppComponent implements AfterViewInit {
   config = config;
+  signinoption = "redirect";
+
   get buttontext() {
     return this.loginComponent?.nativeElement.state === LoginState.LoggedIn
-      ? 'Sign Out'
-      : 'Sign In';
+      ? 'Sign Out with popup'
+      : 'Sign In with popup';
   }
 
   openLogin() {
