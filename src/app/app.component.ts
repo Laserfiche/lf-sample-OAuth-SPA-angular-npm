@@ -79,8 +79,6 @@ interface ILfSelectedFolder {
 })
 export class AppComponent implements AfterViewInit {
   config = config;
-  popup = false;
-  name = 'Popup';
   get buttontext() {
     return this.loginComponent?.nativeElement.state === LoginState.LoggedIn
       ? 'Sign Out'
