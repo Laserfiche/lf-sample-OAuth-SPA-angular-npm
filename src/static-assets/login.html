@@ -1,0 +1,44 @@
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/zone.js@0.11.4/bundles/zone.umd.min.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/@laserfiche/lf-ui-components@15/cdn/lf-ui-components.js"
+    defer
+  ></script>
+  <script>
+    window.onload=() => {
+        const element = document.getElementById("login-component")
+        const loginbutton = element.querySelector(".login-button");
+        element.addEventListener("logoutCompleted", () => {window.close()});
+        element.addEventListener("loginCompleted", () => {window.close()});
+        if (element.state === "LoggedOut") {
+            element.initLoginFlowAsync();
+        } else {
+            console.log("clicking sign out button");
+            loginbutton.click();
+        }
+    }
+  </script>
+  <link
+    href="https://cdn.jsdelivr.net/npm/@laserfiche/lf-ui-components@15/cdn/lf-laserfiche-lite.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://cdn.jsdelivr.net/npm/@laserfiche/lf-ui-components@15/cdn/indigo-pink.css"
+    rel="stylesheet"
+  />
+</head>
+<div style="display: none;" class="lf-component-container lf-right-button">
+  <lf-login
+    style="display: none;"
+    id="login-component"
+    redirect_uri="http://localhost/npm-sample-app/static-assets/login.html"
+    scope="repository.Read repository.Write"
+    authorize_url_host_name="a.clouddev.laserfiche.com"
+    redirect_behavior="Replace"
+    client_id="dfdd65a6-8217-425c-9387-c9c8c5479933"
+    (loginCompleted)="onLoginCompletedAsync()"
+    (logoutCompleted)="onLogoutCompleted()"
+  >
+  </lf-login>
+
+</div>
