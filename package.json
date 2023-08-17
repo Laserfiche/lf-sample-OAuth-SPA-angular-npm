@@ -4,11 +4,12 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
-    "build-dev": "ng build --configuration development",
-    "watch": "ng build --watch --configuration development",
+    "build": "npm run copyconfig && ng build",
+    "build-dev": "ng build --configuration development --delete-output-path false",
+    "watch": "npm run copyconfig && ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "copyconfig": "copy .\\src\\config.ts .\\src\\static-assets\\config.js"
   },
   "license": "MIT",
   "repository": {
