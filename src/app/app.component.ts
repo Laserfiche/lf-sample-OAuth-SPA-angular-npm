@@ -204,7 +204,6 @@ export class AppComponent implements AfterViewInit {
   }
 
   openLogin() {
-    // if (!(this.loginComponent?.nativeElement.state === LoginState.LoggedIn)) {
     window.open(
       'http://localhost/npm-sample-app/static-assets/login.html',
       '_blank',
