@@ -1,15 +1,15 @@
 <h2 class="lf-sample-app-title">Save to Laserfiche Sample Application</h2>
 
 <div class="lf-component-container dropdown-signin-container">
-  <mat-form-field>
-    <mat-select [(value)]="signinoption">
+  <mat-form-field class="lf-field lf-dropdown mat-dropdown">
+    <mat-select [(value)]="signInOption" class="lf-dropdown">
       <mat-option value="redirect">Sign In with redirect</mat-option>
       <mat-option value="popup">Sign In with popup</mat-option>
     </mat-select>
   </mat-form-field>
 
   <div
-    *ngIf="signinoption === 'redirect'"
+    *ngIf="signInOption === 'redirect'"
     class="lf-right-button"
   >
     <lf-login
@@ -26,7 +26,7 @@
   </div>
 
   <div
-    *ngIf="signinoption === 'popup'"
+    *ngIf="signInOption=== 'popup'"
     class="lf-right-button"
   >
     <button (click)="openLogin()"

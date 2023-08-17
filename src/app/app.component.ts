@@ -79,24 +79,8 @@ interface ILfSelectedFolder {
 })
 export class AppComponent implements AfterViewInit {
   config = config;
-  signinoption = "redirect";
+  signInOption = "redirect";
 
-  get buttontext() {
-    return this.loginComponent?.nativeElement.state === LoginState.LoggedIn
-      ? 'Sign Out with popup'
-      : 'Sign In with popup';
-  }
-
-  openLogin() {
-    // if (!(this.loginComponent?.nativeElement.state === LoginState.LoggedIn)) {
-    window.open(
-      'http://localhost/npm-sample-app/static-assets/login.html',
-      '_blank',
-      'popup'
-    );
-    
-
-  }
   toolbarOptions: ToolbarOption[] = [
     {
       name: 'Refresh',
@@ -213,13 +197,27 @@ export class AppComponent implements AfterViewInit {
     await this.initializeFieldContainerAsync();
   }
 
+  get buttontext() {
+    return this.loginComponent?.nativeElement.state === LoginState.LoggedIn
+      ? 'Sign Out with popup'
+      : 'Sign In with popup';
+  }
+
+  openLogin() {
+    // if (!(this.loginComponent?.nativeElement.state === LoginState.LoggedIn)) {
+    window.open(
+      'http://localhost/npm-sample-app/static-assets/login.html',
+      '_blank',
+      'popup'
+    );
+  }
+
   setColumns(columns: ColumnDef[]) {
     this.lfRepositoryBrowser?.nativeElement.setColumnsToDisplay(columns);
     this.selectedColumns = columns;
   }
 
   async onLoginCompletedAsync() {
-    this.ref.detectChanges();
     await this.getAndInitializeRepositoryClientAndServicesAsync();
     await this.initializeFieldContainerAsync();
   }
