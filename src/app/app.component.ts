@@ -175,6 +175,7 @@ export class AppComponent implements AfterViewInit {
   // the UI components
   @ViewChild('lfFieldContainerElement')
   lfFieldContainerElement?: ElementRef<LfFieldContainerComponent>;
+  // loginComponent references both the redirect login component and the hidden popup login component
   @ViewChild('loginComponent') loginComponent?: ElementRef<LfLoginComponent>;
   @ViewChild('lfRepositoryBrowser')
   lfRepositoryBrowser?: ElementRef<LfRepositoryBrowserComponent>;
