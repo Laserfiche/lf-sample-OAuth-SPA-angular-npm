@@ -9,7 +9,7 @@
     "watch": "npm run copyconfig && ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint",
-    "copyconfig-linux": "copy ./src/config.ts ./src/static-assets/config.js",
+    "copyconfig-linux": "cp ./src/config.ts ./src/static-assets/config.js",
     "copyconfig-windows": "copy .\\src\\config.ts .\\src\\static-assets\\config.js",
     "copyconfig": "npm run copyconfig-windows || npm run copyconfig-linux"
   },
