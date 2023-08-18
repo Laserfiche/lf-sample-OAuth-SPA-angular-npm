@@ -39,6 +39,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { NewFolderModalComponent } from './new-folder-modal/new-folder-modal.component';
 import { EditColumnsModalComponent } from './edit-columns-modal/edit-columns-modal.component';
 import config from '../config';
+import { UrlUtils } from '@laserfiche/lf-js-utils';
 
 const resources: Map<string, object> = new Map<string, object>([
   [
@@ -79,6 +80,11 @@ interface ILfSelectedFolder {
 })
 export class AppComponent implements AfterViewInit {
   config = config;
+  signInOption = 'redirect';
+  loginPageUrl = UrlUtils.combineURLs(
+    config.REDIRECT_URI,
+    '/login.html'
+  );
 
   toolbarOptions: ToolbarOption[] = [
     {
@@ -169,6 +175,7 @@ export class AppComponent implements AfterViewInit {
   // the UI components
   @ViewChild('lfFieldContainerElement')
   lfFieldContainerElement?: ElementRef<LfFieldContainerComponent>;
+  // loginComponent references both the redirect login component and the hidden popup login component
   @ViewChild('loginComponent') loginComponent?: ElementRef<LfLoginComponent>;
   @ViewChild('lfRepositoryBrowser')
   lfRepositoryBrowser?: ElementRef<LfRepositoryBrowserComponent>;
@@ -196,6 +203,16 @@ export class AppComponent implements AfterViewInit {
     await this.initializeFieldContainerAsync();
   }
 
+  get buttontext() {
+    return this.loginComponent?.nativeElement.state === LoginState.LoggedIn
+      ? 'Sign Out with popup'
+      : 'Sign In with popup';
+  }
+
+  openLogin() {
+    window.open(this.loginPageUrl, '_blank', 'popup');
+  }
+
   setColumns(columns: ColumnDef[]) {
     this.lfRepositoryBrowser?.nativeElement.setColumnsToDisplay(columns);
     this.selectedColumns = columns;
@@ -207,7 +224,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   onLogoutCompleted() {
-    if(!this.repoClient){
+    if (!this.repoClient) {
       throw new Error('repoClient is undefined');
     }
     this.repoClient.clearCurrentRepo();
@@ -237,20 +254,27 @@ export class AppComponent implements AfterViewInit {
   }
 
   async tryInitRepoClientAsync(): Promise<IRepositoryApiClientExInternal> {
-    if (!this.loginComponent){
-      throw new Error("Login Component is undefined");
+    if (!this.loginComponent) {
+      throw new Error('Login Component is undefined');
     }
-    const repoClient =  await this.makeRepoClientFromLoginComponent(this.loginComponent.nativeElement);
+    const repoClient = await this.makeRepoClientFromLoginComponent(
+      this.loginComponent.nativeElement
+    );
     return repoClient;
   }
 
-  private async makeRepoClientFromLoginComponent(loginComponent: LfLoginComponent): Promise<IRepositoryApiClientExInternal>{
-    const partialRepoClient: IRepositoryApiClient = RepositoryApiClient.createFromHttpRequestHandler(loginComponent.authorizationRequestHandler);
-
-    const getCurrentRepo = async (repoClient: IRepositoryApiClientExInternal) => {
-      const repos = await repoClient.repositoriesClient.getRepositoryList(
-        {}
+  private async makeRepoClientFromLoginComponent(
+    loginComponent: LfLoginComponent
+  ): Promise<IRepositoryApiClientExInternal> {
+    const partialRepoClient: IRepositoryApiClient =
+      RepositoryApiClient.createFromHttpRequestHandler(
+        loginComponent.authorizationRequestHandler
       );
+
+    const getCurrentRepo = async (
+      repoClient: IRepositoryApiClientExInternal
+    ) => {
+      const repos = await repoClient.repositoriesClient.getRepositoryList({});
       const repo = repos ? repos[0] : undefined;
       if (repo?.repoId && repo?.repoName) {
         return { repoId: repo.repoId, repoName: repo.repoName };
@@ -261,10 +285,10 @@ export class AppComponent implements AfterViewInit {
       _repoId: undefined,
       _repoName: undefined,
       clearCurrentRepo: function (): void {
-          repoClient._repoId = undefined;
-          repoClient._repoName = undefined;
-        },
-      getCurrentRepoId: async function(): Promise<string> {
+        repoClient._repoId = undefined;
+        repoClient._repoName = undefined;
+      },
+      getCurrentRepoId: async function (): Promise<string> {
         if (repoClient._repoId) {
           return repoClient._repoId;
         } else {
@@ -282,7 +306,7 @@ export class AppComponent implements AfterViewInit {
           return repoName;
         }
       },
-      ...partialRepoClient
+      ...partialRepoClient,
     };
     return repoClient;
   }
@@ -298,7 +322,7 @@ export class AppComponent implements AfterViewInit {
 
   async initializeTreeAsync() {
     this.ref.detectChanges();
-    if (this.lfRepoTreeNodeService){
+    if (this.lfRepoTreeNodeService) {
       await this.lfRepositoryBrowser?.nativeElement.initAsync(
         this.lfRepoTreeNodeService,
         this.lfSelectedFolder?.selectedFolderPath
@@ -325,8 +349,15 @@ export class AppComponent implements AfterViewInit {
 
   // Tree event handler methods
   async onSelectFolder() {
-    if(!this.lfRepositoryBrowser || !this.repoClient || !this.loginComponent || !this.loginComponent.nativeElement.account_endpoints){
-      throw new Error("Could not set lfSelectedFolder: some of {lfRepositoryBrowser, repoClient, loginComponent, account_endpoints} were undefined");
+    if (
+      !this.lfRepositoryBrowser ||
+      !this.repoClient ||
+      !this.loginComponent ||
+      !this.loginComponent.nativeElement.account_endpoints
+    ) {
+      throw new Error(
+        'Could not set lfSelectedFolder: some of {lfRepositoryBrowser, repoClient, loginComponent, account_endpoints} were undefined'
+      );
     }
     const selectedNode = this.lfRepositoryBrowser.nativeElement
       .currentFolder as LfRepoTreeNode;
@@ -340,12 +371,13 @@ export class AppComponent implements AfterViewInit {
       this.loginComponent.nativeElement.account_endpoints.webClientUrl;
     this.expandFolderBrowser = false;
     this.lfSelectedFolder = {
-      selectedNodeUrl: getEntryWebAccessUrl(
-        entryId.toString(),
-        repoId,
-        waUrl,
-        selectedNode.isContainer
-      ) ?? '',
+      selectedNodeUrl:
+        getEntryWebAccessUrl(
+          entryId.toString(),
+          repoId,
+          waUrl,
+          selectedNode.isContainer
+        ) ?? '',
       selectedFolderName: this.getFolderNameText(entryId, selectedFolderPath),
       selectedFolderPath: selectedFolderPath,
     };
@@ -497,7 +529,7 @@ export class AppComponent implements AfterViewInit {
   // input handler methods
   onInputAreaClick() {
     if (!this.fileInput) {
-      throw new Error("file input undefined");
+      throw new Error('file input undefined');
     }
     this.fileInput.nativeElement.click();
   }
@@ -505,14 +537,14 @@ export class AppComponent implements AfterViewInit {
   async selectFileAsync() {
     const files = this.fileInput?.nativeElement.files;
     this.fileSelected = files?.item(0) ?? undefined;
-    if (this.fileSelected?.name){
+    if (this.fileSelected?.name) {
       this.fileName = PathUtils.removeFileExtension(this.fileSelected.name);
       this.fileExtension = PathUtils.getFileExtension(this.fileSelected.name);
     }
   }
 
   clearFileSelected() {
-    if (this.fileInput){
+    if (this.fileInput) {
       this.fileInput.nativeElement.files = null;
     }
     this.fileSelected = undefined;
@@ -562,8 +594,11 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
-  private async trySaveDocument(edocBlob: FileParameter, entryRequest: PostEntryWithEdocMetadataRequest) {
-    if(!this.repoClient) {
+  private async trySaveDocument(
+    edocBlob: FileParameter,
+    entryRequest: PostEntryWithEdocMetadataRequest
+  ) {
+    if (!this.repoClient) {
       throw new Error('repoClient was undefined');
     }
     if (!this.lfSelectedFolder) {
@@ -655,7 +690,9 @@ export class AppComponent implements AfterViewInit {
   );
   SAVE_TO_LASERFICHE = this.localizationService.getString('SAVE_TO_LASERFICHE');
   CLICK_TO_UPLOAD = this.localizationService.getString('CLICK_TO_UPLOAD');
-  SELECTED_FOLDER_COLON = this.localizationService.getString('SELECTED_FOLDER_COLON');
+  SELECTED_FOLDER_COLON = this.localizationService.getString(
+    'SELECTED_FOLDER_COLON'
+  );
   FILE_NAME_COLON = this.localizationService.getString('FILE_NAME_COLON');
   OPEN_IN_LASERFICHE = this.localizationService.getString('OPEN_IN_LASERFICHE');
   SELECT = this.localizationService.getString('SELECT');

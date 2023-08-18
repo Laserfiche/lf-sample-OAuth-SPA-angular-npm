@@ -1,16 +1,51 @@
 <h2 class="lf-sample-app-title">Save to Laserfiche Sample Application</h2>
-<div class="lf-component-container lf-right-button">
-  <lf-login
-    #loginComponent
-    redirect_uri="{{ config.REDIRECT_URI }}"
-    scope="{{ config.SCOPE }}"
-    authorize_url_host_name="{{ config.HOST_NAME }}"
-    redirect_behavior="Replace"
-    client_id="{{ config.CLIENT_ID }}"
-    (loginCompleted)="onLoginCompletedAsync()"
-    (logoutCompleted)="onLogoutCompleted()"
-  >
-  </lf-login>
+
+<div class="lf-component-container dropdown-signin-container">
+  <mat-form-field class="lf-field lf-dropdown lf-mat-dropdown">
+    <mat-select [(value)]="signInOption" class="lf-dropdown">
+      <mat-option value="redirect">Sign In with redirect</mat-option>
+      <mat-option value="popup">Sign In with popup</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <div *ngIf="signInOption === 'redirect'" class="lf-right-button">
+    <lf-login
+      #loginComponent
+      redirect_uri="{{ config.REDIRECT_URI }}"
+      scope="{{ config.SCOPE }}"
+      authorize_url_host_name="{{ config.HOST_NAME }}"
+      redirect_behavior="Replace"
+      client_id="{{ config.CLIENT_ID }}"
+      (loginCompleted)="onLoginCompletedAsync()"
+      (logoutCompleted)="onLogoutCompleted()"
+    >
+    </lf-login>
+  </div>
+
+  <div *ngIf="signInOption === 'popup'" class="lf-right-button">
+    <button
+      (click)="openLogin()"
+      [ngClass]="{
+        'lf-button': true,
+        'login-button': true,
+        'primary-button': !isLoggedIn,
+        'sec-button': isLoggedIn
+      }"
+    >
+      {{ buttontext }}
+    </button>
+
+    <lf-login
+      [hidden]="true"
+      #loginComponent
+      redirect_uri="{{ loginPageUrl }}"
+      scope="{{ config.SCOPE }}"
+      authorize_url_host_name="{{ config.HOST_NAME }}"
+      redirect_behavior="Replace"
+      client_id="{{ config.CLIENT_ID }}"
+    >
+    </lf-login>
+  </div>
 </div>
 <div *ngIf="isLoggedIn">
   <div class="folder-browse-select lf-component-container">

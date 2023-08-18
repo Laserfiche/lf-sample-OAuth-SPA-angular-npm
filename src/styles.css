@@ -1,6 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 @import '~@laserfiche/lf-ui-components/cdn/lf-laserfiche-lite.css';
-@import '~@laserfiche/lf-ui-components/cdn/indigo-pink.css';
+
 body {
     overflow: auto;
     font-family: 'Open Sans', sans-serif;

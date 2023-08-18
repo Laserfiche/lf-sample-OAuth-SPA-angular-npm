@@ -55,3 +55,13 @@ svg#close {
   right: 0;
   top: 0;
 }
+
+.dropdown-signin-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; 
+}
+
+.lf-mat-dropdown {
+  padding-right: 20px;
+}
