@@ -25,6 +25,8 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
+              "src/config.js",
+              "src/login.html",
               {
                 "glob": "*",
                 "input": "src/static-assets",

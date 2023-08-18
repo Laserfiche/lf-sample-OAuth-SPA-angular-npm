@@ -4,14 +4,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "npm run copyconfig && ng build",
-    "build-dev": "ng build --configuration development --delete-output-path false",
-    "watch": "npm run copyconfig && ng build --watch --configuration development",
+    "build": "ng build",
+    "build-dev": "ng build --configuration development",
+    "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint",
-    "copyconfig-linux": "cp ./src/config.ts ./src/static-assets/config.js",
-    "copyconfig-windows": "copy .\\src\\config.ts .\\src\\static-assets\\config.js",
-    "copyconfig": "npm run copyconfig-windows || npm run copyconfig-linux"
+    "lint": "ng lint"
   },
   "license": "MIT",
   "repository": {
@@ -21,13 +18,13 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "^15.2.9",
-    "@angular/cdk": "~15.2.9",
+    "@angular/cdk": "^15.2.9",
     "@angular/common": "^15.2.9",
     "@angular/compiler": "^15.2.9",
     "@angular/core": "^15.2.9",
     "@angular/elements": "^15.2.9",
     "@angular/forms": "^15.2.9",
-    "@angular/material": "~15.2.9",
+    "@angular/material": "^15.2.9",
     "@angular/platform-browser": "^15.2.9",
     "@angular/platform-browser-dynamic": "^15.2.9",
     "@angular/router": "^15.2.9",

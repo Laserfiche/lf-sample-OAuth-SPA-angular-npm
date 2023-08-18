@@ -39,6 +39,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { NewFolderModalComponent } from './new-folder-modal/new-folder-modal.component';
 import { EditColumnsModalComponent } from './edit-columns-modal/edit-columns-modal.component';
 import config from '../config';
+import { UrlUtils } from '@laserfiche/lf-js-utils';
 
 const resources: Map<string, object> = new Map<string, object>([
   [
@@ -79,7 +80,11 @@ interface ILfSelectedFolder {
 })
 export class AppComponent implements AfterViewInit {
   config = config;
-  signInOption = "redirect";
+  signInOption = 'redirect';
+  loginPageUrl = UrlUtils.combineURLs(
+    config.REDIRECT_URI,
+    '/login.html'
+  );
 
   toolbarOptions: ToolbarOption[] = [
     {
@@ -204,11 +209,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   openLogin() {
-    window.open(
-      'http://localhost/npm-sample-app/static-assets/login.html',
-      '_blank',
-      'popup'
-    );
+    window.open(this.loginPageUrl, '_blank', 'popup');
   }
 
   setColumns(columns: ColumnDef[]) {
