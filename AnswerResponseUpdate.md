@@ -20,7 +20,7 @@ We have added an example of this scenario to [our sample application on GitHub](
  * There is also a hidden `<lf-login>` component on the main SPA page when signing in via popup. This is because once you login in the popup, the `<lf-login>` in the SPA will also change state to `LoggedIn` and have access to the accessToken. We use that state to hide/show the rest of the page.
  * We do not currently have an `initLogoutFlowAsync`, but used a workaround by calling the `.click()` event of the button on the `<lf-login>` component in `login.html` when the page is launched, so the user doesn't have to click a second button. We are looking at implementing the `initLogoutFlowAsync` function so that we do not have to use this workaround.
 
- * Note: `config.ts` now also has a `REDIRECT_URI_POPUP` field in order to login from within the popup. Check for comments in this file for instructions on structure of this link. Note that running `npm run build` and other analogous commands will run a script to copy this file into the `/dist` folder for the `index.html` to have access to.
+ * Note: `config.ts` now also has a `REDIRECT_URI_POPUP` field in order to login from within the popup. Check for comments in this file for instructions on structure of this link. Note that running `npm run build` and other analogous commands will run a script to copy this file with a `.js` extension into the `/dist` folder for the `index.html` to have access to.
       * If you are using the direct redirect, you only need to register the REDIRECT_URI in devconsole
 	  * if you are using the popup login, you need to register the REDIRECT_URI_POPUP in devconsole
 
