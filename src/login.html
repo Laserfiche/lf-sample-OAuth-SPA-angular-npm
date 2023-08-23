@@ -21,8 +21,8 @@
       console.log("redirect URI is ,", config.REDIRECT_URI + '/login.html' + (isLogoutFlow ? '?a=tennis' : ''));
       loginComponent.setAttribute(
         'redirect_uri',
-        // (new URL(document.location)).searchParams.get("redirect_uri") + '/login.html' + (isLogoutFlow ? '?a=tennis' : '')
-          config.REDIRECT_URI + '/login.html' + (isLogoutFlow ? '?a=tennis' : '')
+        (new URL(document.location)).searchParams.get("redirect_uri") + '/login.html' + (isLogoutFlow ? '?a=tennis' : '')
+          // config.REDIRECT_URI + '/login.html' + (isLogoutFlow ? '?a=tennis' : '')
       );
     }
     window.onload = () => {
@@ -37,19 +37,19 @@
       if (document.location.href.includes("code=")) {
         setRedirectUri(false, loginComponent);
       }
-      loginComponent.setAttribute('scope', config.SCOPE);
-      loginComponent.setAttribute('authorize_url_host_name', config.HOST_NAME);
-      loginComponent.setAttribute('client_id', config.CLIENT_ID);
-      loginComponent.setAttribute('redirect_behavior', 'Replace');
-      loginComponent.setAttribute('id', 'login-component');
-      loginComponent.setAttribute('style', 'display: none');
-
-      // loginComponent.setAttribute('scope', params.get("scope"));
-      // loginComponent.setAttribute('authorize_url_host_name', params.get("hostname"));
-      // loginComponent.setAttribute('client_id', params.get("client_id"));
+      // loginComponent.setAttribute('scope', config.SCOPE);
+      // loginComponent.setAttribute('authorize_url_host_name', config.HOST_NAME);
+      // loginComponent.setAttribute('client_id', config.CLIENT_ID);
       // loginComponent.setAttribute('redirect_behavior', 'Replace');
       // loginComponent.setAttribute('id', 'login-component');
       // loginComponent.setAttribute('style', 'display: none');
+
+      loginComponent.setAttribute('scope', params.get("scope"));
+      loginComponent.setAttribute('authorize_url_host_name', params.get("hostname"));
+      loginComponent.setAttribute('client_id', params.get("client_id"));
+      loginComponent.setAttribute('redirect_behavior', 'Replace');
+      loginComponent.setAttribute('id', 'login-component');
+      loginComponent.setAttribute('style', 'display: none');
 
       document.body.appendChild(loginComponent);
       // setRedirectUri(false, loginComponent);
