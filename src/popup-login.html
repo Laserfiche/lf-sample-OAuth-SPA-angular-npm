@@ -9,10 +9,10 @@
     import config from './config.js';
 
     function setRedirectUri(isLogoutFlow, loginComponent) {
-      console.log("redirect URI is ,", config.REDIRECT_URI + '/login.html' + (isLogoutFlow ? '?a=tennis' : ''));
+      console.log("redirect URI is ,", config.REDIRECT_URI + '/popup-login.html' + (isLogoutFlow ? '?a=tennis' : ''));
       loginComponent.setAttribute(
         'redirect_uri',
-          config.REDIRECT_URI + '/login.html' + (isLogoutFlow ? '?a=sso-logout-completed' : '')
+          config.REDIRECT_URI + '/popup-login.html' + (isLogoutFlow ? '?a=sso-logout-completed' : '')
       );
     }
 
