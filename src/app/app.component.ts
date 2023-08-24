@@ -83,8 +83,7 @@ export class AppComponent implements AfterViewInit {
   signInOption = 'redirect';
   loginPageUrl = UrlUtils.combineURLs(
     config.REDIRECT_URI,
-    '/login.html?scope=repository.Read%20repository.Write&hostname=a.clouddev.laserfiche.com&client_id=dfdd65a6-8217-425c-9387-c9c8c5479933&redirect_uri=https://warrenton.laserfiche.com/npm-sample-app'
-    // '/login.html'
+    '/login.html'
   );
 
   toolbarOptions: ToolbarOption[] = [

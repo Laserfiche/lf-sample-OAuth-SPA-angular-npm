@@ -1,12 +1,3 @@
-<!-- Navigation Use cases: 
-      1. Starting from LoggedOut State
-            lf-login_state = LoggedOut
-      2. Logged in to logout
-            lf-login_state = LoggedIn
-      3. loginCompleted from ACS
-            querystring contains authorization code
-      4. logoutCompleted from ACS
-            queryString contains "a=logoutCompleted" -->
 <head>
   <script src="https://cdn.jsdelivr.net/npm/zone.js@0.11.4/bundles/zone.umd.min.js"></script>
   <script
@@ -21,39 +12,27 @@
       console.log("redirect URI is ,", config.REDIRECT_URI + '/login.html' + (isLogoutFlow ? '?a=tennis' : ''));
       loginComponent.setAttribute(
         'redirect_uri',
-        (new URL(document.location)).searchParams.get("redirect_uri") + '/login.html' + (isLogoutFlow ? '?a=tennis' : '')
-          // config.REDIRECT_URI + '/login.html' + (isLogoutFlow ? '?a=tennis' : '')
+          config.REDIRECT_URI + '/login.html' + (isLogoutFlow ? '?a=sso-logout-completed' : '')
       );
     }
-    window.onload = () => {
+
+    function addLoginComponent() {
       const loginComponent = document.createElement('lf-login');
 
-
-      let params = (new URL(document.location)).searchParams;
-      // loginComponent.setAttribute(
-      //   'redirect_uri',
-      //   // (new URL(document.location)).searchParams.get("redirect_uri") + '/login.html'
-      //    config.REDIRECT_URI + '/login.html' 
-      // );
       if (document.location.href.includes("code=")) {
         setRedirectUri(false, loginComponent);
       }
-      // loginComponent.setAttribute('scope', config.SCOPE);
-      // loginComponent.setAttribute('authorize_url_host_name', config.HOST_NAME);
-      // loginComponent.setAttribute('client_id', config.CLIENT_ID);
-      // loginComponent.setAttribute('redirect_behavior', 'Replace');
-      // loginComponent.setAttribute('id', 'login-component');
-      // loginComponent.setAttribute('style', 'display: none');
-
-      loginComponent.setAttribute('scope', params.get("scope"));
-      loginComponent.setAttribute('authorize_url_host_name', params.get("hostname"));
-      loginComponent.setAttribute('client_id', params.get("client_id"));
+      loginComponent.setAttribute('scope', config.SCOPE);
+      loginComponent.setAttribute('authorize_url_host_name', config.HOST_NAME);
+      loginComponent.setAttribute('client_id', config.CLIENT_ID);
       loginComponent.setAttribute('redirect_behavior', 'Replace');
       loginComponent.setAttribute('id', 'login-component');
       loginComponent.setAttribute('style', 'display: none');
-
       document.body.appendChild(loginComponent);
-      // setRedirectUri(false, loginComponent);
+    }
+
+    window.onload = () => {
+      addLoginComponent();
 
       const element = document.getElementById('login-component');
       const loginbutton = element.querySelector('.login-button');
@@ -61,21 +40,19 @@
         window.close();
       });
 
-      // TODO Don't use the referrer, add a query string tag that means
-      // close after logout
-      const closeAfterLogout = document.location.href.includes('tennis');
+      const closeAfterLogout = document.location.href.includes('sso-logout-completed');
+
       if (document.location.href.includes("code=")) {
         console.log("Login completed with current state: ", element.state);
       } else if (closeAfterLogout) {
-        console.log("Closing window: logout completed: ", element.state);
+        // Close popup window after logout
         window.close();
       } else if (element.state === 'LoggedOut') {
+        // Start the login flow
         setRedirectUri(false, element);
         element.initLoginFlowAsync();
-      } 
-      else { 
-        // Start the logout flow: TODO create an initLogoutFlowAsync()
-        console.log("else block");
+      } else { 
+        // Start the logout flow by clicking on the login-button on the lf-login component
         setRedirectUri(true, element);
         loginbutton.click(); 
       }
