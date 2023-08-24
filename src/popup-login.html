@@ -5,21 +5,22 @@
     defer
   ></script>
   <script type="module">
-    "use strict";
+    'use strict';
     import config from './config.js';
 
     function setRedirectUri(isLogoutFlow, loginComponent) {
-      console.log("redirect URI is ,", config.REDIRECT_URI + '/popup-login.html' + (isLogoutFlow ? '?a=tennis' : ''));
       loginComponent.setAttribute(
         'redirect_uri',
-          config.REDIRECT_URI + '/popup-login.html' + (isLogoutFlow ? '?a=sso-logout-completed' : '')
+        config.REDIRECT_URI +
+          '/popup-login.html' +
+          (isLogoutFlow ? '?a=sso-logout-completed' : '')
       );
     }
 
     function addLoginComponent() {
       const loginComponent = document.createElement('lf-login');
 
-      if (document.location.href.includes("code=")) {
+      if (document.location.href.includes('code=')) {
         setRedirectUri(false, loginComponent);
       }
       loginComponent.setAttribute('scope', config.SCOPE);
@@ -40,10 +41,12 @@
         window.close();
       });
 
-      const closeAfterLogout = document.location.href.includes('sso-logout-completed');
+      const closeAfterLogout = document.location.href.includes(
+        'sso-logout-completed'
+      );
 
-      if (document.location.href.includes("code=")) {
-        console.log("Login completed with current state: ", element.state);
+      if (document.location.href.includes('code=')) {
+        console.log('Login completed with current state: ', element.state);
       } else if (closeAfterLogout) {
         // Close popup window after logout
         window.close();
@@ -51,10 +54,10 @@
         // Start the login flow
         setRedirectUri(false, element);
         element.initLoginFlowAsync();
-      } else { 
+      } else {
         // Start the logout flow by clicking on the login-button on the lf-login component
         setRedirectUri(true, element);
-        loginbutton.click(); 
+        loginbutton.click();
       }
     };
   </script>
