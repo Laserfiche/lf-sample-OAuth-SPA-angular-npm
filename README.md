@@ -38,6 +38,13 @@ We welcome contributions and feedback. Please follow our [contributing guideline
 5. Run `npm install` in root folder. This command installs dependencies packages.
 6. Run `ng build` in root folder. This command builds the project into `dist/` directory. See below for suggestions on how to host this folder.
 
+## How to use <lf-login> component in a popup window
+ - Add the file [`popup-login.html`](src/popup-login.html) to your project.
+ - Configure [`app.component.ts`](src/app/app.component.ts) to open the `popup-login.html` in a new window when you want to initiate a Sign In or Sign Out. Refer to our implementation in this sample app for more details. 
+ - Make sure that your built `dist` folder has the `config.js` file for the popup-html page to access. 
+ - If you wish to, you can also write the `popup-login.html` page within your SPA using Angular, by implementing/adding the page to your routing. We wrote a static page for simplicity.
+ - For security resons, the ACS/OAuth sign in page has to use the top level of the browser, hence it cannot be in an iframe. Further, using a Modal on top of the SPA will cause the application to redirect the entire browser window to adhere to ACS/OAuth rules.
+ - refer to [this Pull Request](https://github.com/Laserfiche/lf-sample-OAuth-SPA-angular-npm/pull/20) for detailed explanation on the changes.
 ## Build
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
