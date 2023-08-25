@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      href="https://cdn.jsdelivr.net/npm/@laserfiche/lf-ui-components@15/cdn/lf-laserfiche-lite.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@laserfiche/lf-ui-components@15/cdn/indigo-pink.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/zone.js@0.11.4/bundles/zone.umd.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@laserfiche/lf-ui-components@15/cdn/lf-ui-components.js"
+      defer
+    ></script>
+    <script type="module">
+      'use strict';
+      import config from './config.js';
+
+      function getDocumentUrlNoQs() {
+        const thisURL = new URL(document.location.href);
+        return thisURL.origin + thisURL.pathname;
+      }
+
+      function addLoginComponent(addRedirectQS) {
+        const loginComponent = document.createElement('lf-login');
+
+        loginComponent.setAttribute('redirect_uri', getDocumentUrlNoQs());
+        loginComponent.setAttribute('scope', config.SCOPE);
+        loginComponent.setAttribute(
+          'authorize_url_host_name',
+          config.HOST_NAME
+        );
+        loginComponent.setAttribute('client_id', config.CLIENT_ID);
+        loginComponent.setAttribute('redirect_behavior', 'Replace');
+        loginComponent.setAttribute('id', 'login-component');
+        loginComponent.setAttribute('style', 'display: none');
+        return document.body.appendChild(loginComponent);
+      }
+
+      window.onload = () => {
+        if (document.location.href.includes('code=')) {
+          // Navigated from ACS - login Completed
+          const loginElement = addLoginComponent(false);
+          loginElement.addEventListener('loginCompleted', () => {
+            window.close();
+          });
+        } else if (document.referrer.includes('accounts.')) {
+          // Navigated from ACS - logout Completed
+          window.close();
+        } else {
+          // Navigated from app
+          const loginElement = addLoginComponent(false);
+          if (loginElement.state === 'LoggedOut') {
+            // Start the login flow
+            loginElement.initLoginFlowAsync();
+          } else {
+            // Start the logout flow by clicking on the login-button on the lf-login component
+            const loginbutton = loginElement.querySelector('.login-button');
+            loginbutton.click();
+          }
+        }
+      };
+    </script>
+  </head>
+  <body></body>
+</html>

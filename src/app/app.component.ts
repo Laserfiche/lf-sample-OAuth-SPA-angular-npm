@@ -83,7 +83,7 @@ export class AppComponent implements AfterViewInit {
   signInOption = 'redirect';
   loginPageUrl = UrlUtils.combineURLs(
     config.REDIRECT_URI,
-    '/login.html'
+    '/popup-login.html'
   );
 
   toolbarOptions: ToolbarOption[] = [

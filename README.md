@@ -29,7 +29,7 @@ We welcome contributions and feedback. Please follow our [contributing guideline
 0. Clone the repo
 1. Create a new Single Page App in devconsole for [US](https://app.laserfiche.com/devconsole/apps), [Canada](https://app.laserfiche.ca/devconsole/apps), or [Europe](https://app.eu.laserfiche.com/devconsole/apps) (depending on your region). This can also be accessed via the app picker in the top right when logged into your Laserfiche account.
     - Add the authentication redirect URI (e.g.: <https://myapp.example.com/lf-sample-app/>). This redirect URI in the devconsole must match the REDIRECT_URI variable in `src/app/config.js`, which must match the address on which you are hosting your application.
-       - **Note: If you want to use the popup login as well, you must register the login page too (e.g. <https://myapp.example.com/lf-sample-app/login.html>)
+       - **Note: If you want to use the popup login as well, you must register the login page too (e.g. <https://myapp.example.com/lf-sample-app/popup-login.html>)
    - Select required scope(s) needed to read and write to the repository in the 'Authentication' tab  ("repository.Read" and "repository.Write" ). Scopes are case-sensitive and space-delimited. 
    - Note that in order to access the devconsole, your user account must have been given Developer Console Administrator Access Rights by an Account Administrator. Otherwise you will see a message along the lines of "You do not have permission to view the developer console."
 2. Open folder (containing package.json) with Visual Studio Code
