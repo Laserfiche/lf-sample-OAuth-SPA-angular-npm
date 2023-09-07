@@ -45,7 +45,7 @@ We welcome contributions and feedback. Please follow our [contributing guideline
  - Make sure that your built `dist` folder has the `config.js` file for the popup-html page to access configuration information. 
  - You can also write the `popup-login.html` page within your SPA using Angular, by implementing/adding the page to your routing. We wrote a static page for simplicity.
  - For security reasons, the OAuth sign in page has to use the top most level of the browser, so the component cannot be used in elements such as iframes. Further, using a Modal on top of the SPA will cause the application to redirect the entire browser window to adhere to OAuth rules.
- - Refer to this [Pull Request](https://github.com/Laserfiche/lf-sample-OAuth-SPA-angular-npm/pull/20) for an explanation on the changes.
+ - Refer to this [Pull Request](https://github.com/Laserfiche/lf-sample-OAuth-SPA-angular-npm/pull/20) for an explanation on the implementation.
 ## Build
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
