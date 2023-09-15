@@ -10,7 +10,7 @@ import { LfBreadcrumbsModule } from '@laserfiche/lf-ui-components/shared';
 import { NewFolderModalComponent } from './new-folder-modal/new-folder-modal.component';
 import { EditColumnsModalComponent } from './edit-columns-modal/edit-columns-modal.component';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatLegacySelectModule as MatSelectModule } from '@angular/material/legacy-select';
+import { MatSelectModule} from '@angular/material/select';
 
 @NgModule({
   declarations: [
