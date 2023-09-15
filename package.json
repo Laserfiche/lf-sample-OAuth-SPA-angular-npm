@@ -34,7 +34,7 @@
     "@laserfiche/lf-ui-components-services": "^15.0.0",
     "rxjs": "^7.8.1",
     "tslib": "^2.3.1",
-    "zone.js": "^0.11.8"
+    "zone.js": "^0.13.3"
   },
   "devDependencies": {
     "@angular-eslint/builder": "^15.2.1",
