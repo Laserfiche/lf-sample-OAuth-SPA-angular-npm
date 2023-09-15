@@ -30,7 +30,7 @@
     "@angular/router": "^15.2.9",
     "@laserfiche/lf-js-utils": "^4.0.8",
     "@laserfiche/lf-repository-api-client": "^1.1.3",
-    "@laserfiche/lf-ui-components": "^15.0.4",
+    "@laserfiche/lf-ui-components": "^16.0.0--preview-6201742016",
     "@laserfiche/lf-ui-components-services": "^15.0.0",
     "rxjs": "^7.8.1",
     "tslib": "^2.3.1",
