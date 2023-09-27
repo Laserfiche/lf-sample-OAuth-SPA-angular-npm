@@ -2,9 +2,9 @@
 
 <div class="lf-component-container dropdown-signin-container">
   <mat-form-field class="lf-field lf-dropdown lf-template-picker lf-mat-dropdown">
-    <mat-select [(value)]="signInOption" class="lf-dropdown">
-      <mat-option value="redirect">Sign In with redirect</mat-option>
-      <mat-option value="popup">Sign In with popup</mat-option>
+    <mat-select panelClass="lf-dropdown-overlay" [(value)]="signInOption" class="lf-dropdown">
+      <mat-option value="redirect">{{isLoggedIn ? "Sign Out with redirect" : "Sign In with redirect"}}</mat-option>
+      <mat-option value="popup">{{isLoggedIn? "Sign Out with popup" : "Sign in with popup"}}</mat-option>
     </mat-select>
   </mat-form-field>
 
@@ -37,13 +37,15 @@
     </button>
 
     <lf-login
-      [hidden]="true"
+    [hidden]="true"
       #loginComponent
       redirect_uri="{{ loginPageUrl }}"
       scope="{{ config.SCOPE }}"
       authorize_url_host_name="{{ config.HOST_NAME }}"
       redirect_behavior="Replace"
       client_id="{{ config.CLIENT_ID }}"
+      (loginCompleted)="onLoginCompletedAsync()"
+      (logoutCompleted)="onLogoutCompleted()"
     >
     <!-- Usecase 2: Login in a different Popup window. This hidden component is used to 
       subscribe to Login State change. -->
