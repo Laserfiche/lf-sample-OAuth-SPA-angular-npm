@@ -44,6 +44,8 @@
       authorize_url_host_name="{{ config.HOST_NAME }}"
       redirect_behavior="Replace"
       client_id="{{ config.CLIENT_ID }}"
+      (loginCompleted)="onLoginCompletedAsync()"
+      (logoutCompleted)="onLogoutCompleted()"
     >
     <!-- Usecase 2: Login in a different Popup window. This hidden component is used to 
       subscribe to Login State change. -->
