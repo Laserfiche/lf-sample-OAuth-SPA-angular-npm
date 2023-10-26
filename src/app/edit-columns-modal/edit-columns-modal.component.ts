@@ -1,3 +1,6 @@
+// Copyright (c) Laserfiche.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
 import { Component, Inject } from '@angular/core';
 import { LfLocalizationService } from '@laserfiche/lf-js-utils';
 import { ColumnDef } from '@laserfiche/lf-ui-components/lf-selection-list';

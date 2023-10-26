@@ -1,3 +1,6 @@
+// Copyright (c) Laserfiche.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
 const config = {
   REDIRECT_URI: 'REPLACE_WITH_YOUR_REDIRECT_URI', // i.e http://localhost:3000, https://serverName/lf-sample  Register both REDIRECT_URL and REDIRECT_URI/login.html in devconsole
   CLIENT_ID: 'REPLACE_WITH_YOUR_CLIENT_ID',
