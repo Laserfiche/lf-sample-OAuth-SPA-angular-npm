@@ -1,3 +1,6 @@
+<!--Copyright (c) Laserfiche.
+Licensed under the MIT License. See LICENSE in the project root for license information.-->
+
 # Contributing to lf-sample-OAuth-SPA-angular-npm
 
 We encourage and appreciate feedback and contribution from the community!
