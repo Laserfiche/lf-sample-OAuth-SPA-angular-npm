@@ -1,4 +1,4 @@
-<!--Copyright (c) Laserfiche.
+<!--Copyright Laserfiche.
 Licensed under the MIT License. See LICENSE in the project root for license information.-->
 
 # Laserfiche Sample App
@@ -24,7 +24,7 @@ We welcome contributions and feedback. Please follow our [contributing guideline
 ## Pre-Requisites
 
 - Visual Studio Code
-- Node 16 (LTS)
+- Node 18 (LTS)
 - all other Angular pre-reqs are in the local package.json
 
 ## First Time Setup
