@@ -26,10 +26,29 @@
       "extends": [
         "plugin:@angular-eslint/recommended"
       ],
-      "plugins": ["@typescript-eslint", "@angular-eslint"],
+      "plugins": [
+        "@typescript-eslint",
+        "@angular-eslint",
+        "@stylistic"
+      ],
       "rules": {
+        "@stylistic/member-delimiter-style": [
+          "error",
+          {
+            "multiline": {
+              "delimiter": "semi",
+              "requireLast": true
+            },
+            "singleline": {
+              "delimiter": "semi",
+              "requireLast": false
+            }
+          }
+        ],
         "@typescript-eslint/no-inferrable-types": "off",
-        "semi": ["error"],
+        "semi": [
+          "error"
+        ],
         "no-bitwise": "off",
         "prefer-const": "error"
       }
