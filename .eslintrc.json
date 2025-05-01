@@ -28,21 +28,8 @@
       ],
       "plugins": ["@typescript-eslint", "@angular-eslint"],
       "rules": {
-        "@typescript-eslint/member-delimiter-style": [
-          "error",
-          {
-            "multiline": {
-              "delimiter": "semi",
-              "requireLast": true
-            },
-            "singleline": {
-              "delimiter": "semi",
-              "requireLast": false
-            }
-          }
-        ],
         "@typescript-eslint/no-inferrable-types": "off",
-        "@typescript-eslint/semi": ["error"],
+        "semi": ["error"],
         "no-bitwise": "off",
         "prefer-const": "error"
       }
