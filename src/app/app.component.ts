@@ -5,22 +5,25 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   Component,
+  CUSTOM_ELEMENTS_SCHEMA,
   ElementRef,
+  inject,
   ViewChild,
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import {
-  PostEntryWithEdocMetadataRequest,
+  ImportEntryRequest,
+  ImportEntryRequestMetadata,
   FileParameter,
   RepositoryApiClient,
   IRepositoryApiClient,
-  PutFieldValsRequest,
   FieldToUpdate,
-  ValueToUpdate,
   EntryType,
   Shortcut,
-  PostEntryChildrenRequest,
-  PostEntryChildrenEntryType,
-} from '@laserfiche/lf-repository-api-client';
+  CreateEntryRequest,
+  CreateEntryRequestEntryType,
+} from '@laserfiche/lf-repository-api-client-v2';
 import {
   LfFieldsService,
   LfRepoTreeNodeService,
@@ -39,6 +42,8 @@ import { ColumnDef } from '@laserfiche/lf-ui-components/lf-selection-list';
 import { ToolbarOption } from '@laserfiche/lf-ui-components/shared';
 import { getEntryWebAccessUrl } from './lf-url-utils';
 import { MatDialog } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { NewFolderModalComponent } from './new-folder-modal/new-folder-modal.component';
 import { EditColumnsModalComponent } from './edit-columns-modal/edit-columns-modal.component';
 import config from '../config';
@@ -80,14 +85,14 @@ interface ILfSelectedFolder {
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
+  standalone: true,
+  imports: [CommonModule, FormsModule, MatFormFieldModule, MatSelectModule],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppComponent implements AfterViewInit {
   config = config;
   signInOption = 'redirect';
-  loginPageUrl = UrlUtils.combineURLs(
-    config.REDIRECT_URI,
-    '/popup-login.html'
-  );
+  loginPageUrl = UrlUtils.combineURLs(config.REDIRECT_URI, '/popup-login.html');
 
   toolbarOptions: ToolbarOption[] = [
     {
@@ -198,7 +203,8 @@ export class AppComponent implements AfterViewInit {
   fileExtension?: string;
   entrySelected?: LfTreeNode;
 
-  constructor(private ref: ChangeDetectorRef, public dialog: MatDialog) {}
+  private ref = inject(ChangeDetectorRef);
+  dialog = inject(MatDialog);
 
   // Angular hook, after view is initiated
   async ngAfterViewInit(): Promise<void> {
@@ -277,10 +283,10 @@ export class AppComponent implements AfterViewInit {
     const getCurrentRepo = async (
       repoClient: IRepositoryApiClientExInternal
     ) => {
-      const repos = await repoClient.repositoriesClient.getRepositoryList({});
-      const repo = repos ? repos[0] : undefined;
-      if (repo?.repoId && repo?.repoName) {
-        return { repoId: repo.repoId, repoName: repo.repoName };
+      const repos = await repoClient.repositoriesClient.listRepositories({});
+      const repo = repos.value?.[0];
+      if (repo?.id && repo?.name) {
+        return { repoId: repo.id, repoName: repo.name };
       }
       throw new Error('Current repo id or name undefined.');
     };
@@ -453,13 +459,13 @@ export class AppComponent implements AfterViewInit {
     }
     const entryId =
       (parentNode as LfRepoTreeNode).targetId ?? parseInt(parentNode.id, 10);
-    const request: PostEntryChildrenRequest = new PostEntryChildrenRequest({
+    const request: CreateEntryRequest = new CreateEntryRequest({
       name: folderName,
-      entryType: PostEntryChildrenEntryType.Folder,
+      entryType: CreateEntryRequestEntryType.Folder,
     });
-    const repoId: string = await this.repoClient.getCurrentRepoId();
-    await this.repoClient?.entriesClient.createOrCopyEntry({
-      repoId,
+    const repositoryId: string = await this.repoClient.getCurrentRepoId();
+    await this.repoClient?.entriesClient.createEntry({
+      repositoryId,
       entryId,
       request,
     });
@@ -575,11 +581,10 @@ export class AppComponent implements AfterViewInit {
       };
 
       const metadataRequest = await this.createMetadataRequestAsync();
-      const entryRequest: PostEntryWithEdocMetadataRequest =
-        new PostEntryWithEdocMetadataRequest({
-          metadata: metadataRequest.metadata,
-          template: metadataRequest.template,
-        });
+      const entryRequest: ImportEntryRequest = new ImportEntryRequest({
+        name: fileNameWithExtension,
+        metadata: metadataRequest,
+      });
 
       try {
         await this.trySaveDocument(edocBlob, entryRequest);
@@ -599,7 +604,7 @@ export class AppComponent implements AfterViewInit {
 
   private async trySaveDocument(
     edocBlob: FileParameter,
-    entryRequest: PostEntryWithEdocMetadataRequest
+    entryRequest: ImportEntryRequest
   ) {
     if (!this.repoClient) {
       throw new Error('repoClient was undefined');
@@ -610,10 +615,10 @@ export class AppComponent implements AfterViewInit {
     if (!this.fileName) {
       throw new Error('fileName was undefined');
     }
-    const repoId = await this.repoClient.getCurrentRepoId();
+    const repositoryId = await this.repoClient.getCurrentRepoId();
     const currentSelectedByPathResponse =
       await this.repoClient.entriesClient.getEntryByPath({
-        repoId,
+        repositoryId,
         fullPath: this.lfSelectedFolder.selectedFolderPath,
       });
     const currentSelectedEntry = currentSelectedByPathResponse.entry;
@@ -628,61 +633,40 @@ export class AppComponent implements AfterViewInit {
     if (!parentEntryId) {
       throw new Error('parentEntryId was undefined');
     }
-    await this.repoClient.entriesClient.importDocument({
-      repoId,
-      parentEntryId,
-      fileName: this.fileName,
-      autoRename: true,
-      electronicDocument: edocBlob,
+    await this.repoClient.entriesClient.importEntry({
+      repositoryId,
+      entryId: parentEntryId,
+      file: edocBlob,
       request: entryRequest,
     });
     window.alert('Successfully saved document to Laserfiche');
   }
 
-  private async createMetadataRequestAsync(): Promise<PostEntryWithEdocMetadataRequest> {
+  private async createMetadataRequestAsync(): Promise<ImportEntryRequestMetadata> {
     const fieldValues =
       this.lfFieldContainerElement?.nativeElement?.getFieldValues() ?? {};
     const templateName =
       this.lfFieldContainerElement?.nativeElement?.getTemplateValue()?.name ??
       '';
 
-    const formattedFieldValues:
-      | {
-          [key: string]: FieldToUpdate;
-        }
-      | undefined = {};
+    const formattedFields: FieldToUpdate[] = [];
 
     for (const key in fieldValues) {
-      const value = fieldValues[key];
-      formattedFieldValues[key] = new FieldToUpdate({
-        ...value,
-        values: (value.values ?? []).map((val) => new ValueToUpdate(val)),
-      });
+      const field = fieldValues[key];
+      formattedFields.push(
+        new FieldToUpdate({
+          name: key,
+          values: (field.values ?? []).map((val: any) => val.value as string),
+        })
+      );
     }
 
-    const requestMetadata: PostEntryWithEdocMetadataRequest =
-      this.getPostEntryRequest(templateName, formattedFieldValues);
+    const requestMetadata = new ImportEntryRequestMetadata({
+      templateName:
+        templateName && templateName.length > 0 ? templateName : undefined,
+      fields: formattedFields,
+    });
     return requestMetadata;
-  }
-
-  private getPostEntryRequest(
-    templateName: string | undefined,
-    allFields:
-      | {
-          [key: string]: FieldToUpdate;
-        }
-      | undefined
-  ): PostEntryWithEdocMetadataRequest {
-    const entryRequest: PostEntryWithEdocMetadataRequest =
-      new PostEntryWithEdocMetadataRequest({
-        metadata: new PutFieldValsRequest({
-          fields: allFields,
-        }),
-      });
-    if (templateName && templateName.length > 0) {
-      entryRequest.template = templateName;
-    }
-    return entryRequest;
   }
 
   // localization helpers
