@@ -24,7 +24,7 @@ We welcome contributions and feedback. Please follow our [contributing guideline
 ## Pre-Requisites
 
 - Visual Studio Code
-- Node 20 (LTS)
+- Node 24
 - all other Angular pre-reqs are in the local package.json
 
 ## First Time Setup
