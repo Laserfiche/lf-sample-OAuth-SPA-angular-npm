@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "serve": "ng serve laserfiche-sample-app --configuration development --host 127.0.0.1 --port 4200",
     "build": "ng build",
     "build-dev": "ng build --configuration development",
     "watch": "ng build --watch --configuration development",
