@@ -134,7 +134,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   loginPageUrl = UrlUtils.combineURLs(config.REDIRECT_URI, '/popup-login.html');
 
   urlRegex: RegExp =
-    /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.%]+$/;
+    /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
 
   selfHostedForm = new FormGroup({
     repositoryName: new FormControl('', { validators: Validators.required }),
