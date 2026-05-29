@@ -5,22 +5,32 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   Component,
+  CUSTOM_ELEMENTS_SCHEMA,
   ElementRef,
+  inject,
+  OnInit,
   ViewChild,
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import {
-  PostEntryWithEdocMetadataRequest,
+  FormsModule,
+  ReactiveFormsModule,
+  FormGroup,
+  Validators,
+  FormControl,
+} from '@angular/forms';
+import {
+  ImportEntryRequest,
+  ImportEntryRequestMetadata,
   FileParameter,
   RepositoryApiClient,
   IRepositoryApiClient,
-  PutFieldValsRequest,
   FieldToUpdate,
-  ValueToUpdate,
   EntryType,
   Shortcut,
-  PostEntryChildrenRequest,
-  PostEntryChildrenEntryType,
-} from '@laserfiche/lf-repository-api-client';
+  CreateEntryRequest,
+  CreateEntryRequestEntryType,
+} from '@laserfiche/lf-repository-api-client-v2';
 import {
   LfFieldsService,
   LfRepoTreeNodeService,
@@ -28,9 +38,17 @@ import {
   LfRepoTreeNode,
 } from '@laserfiche/lf-ui-components-services';
 import { LfLocalizationService, PathUtils } from '@laserfiche/lf-js-utils';
-import { LfLoginComponent } from '@laserfiche/lf-ui-components/lf-login';
+import {
+  AccountEndpoints,
+  LfLoginComponent,
+} from '@laserfiche/lf-ui-components/lf-login';
 import { LfFieldContainerComponent } from '@laserfiche/lf-ui-components/lf-metadata';
-import { LoginState } from '@laserfiche/lf-ui-components/shared';
+import {
+  LfToolbarComponent,
+  LoginState,
+  LoginType,
+  RedirectBehavior,
+} from '@laserfiche/lf-ui-components/shared';
 import {
   LfRepositoryBrowserComponent,
   LfTreeNode,
@@ -39,10 +57,16 @@ import { ColumnDef } from '@laserfiche/lf-ui-components/lf-selection-list';
 import { ToolbarOption } from '@laserfiche/lf-ui-components/shared';
 import { getEntryWebAccessUrl } from './lf-url-utils';
 import { MatDialog } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectChange, MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
 import { NewFolderModalComponent } from './new-folder-modal/new-folder-modal.component';
 import { EditColumnsModalComponent } from './edit-columns-modal/edit-columns-modal.component';
 import config from '../config';
 import { UrlUtils } from '@laserfiche/lf-js-utils';
+
+const SELECTED_SIGN_IN_OPTION = 'selectedSignInOption';
+const SELF_HOSTED_CONFIG = 'selfHostedRepositoryConfig';
 
 const resources: Map<string, object> = new Map<string, object>([
   [
@@ -76,18 +100,51 @@ interface ILfSelectedFolder {
   selectedFolderName: string; // name of the selected folder
 }
 
+interface SelfHostedRepositoryConfig {
+  repositoryId: string;
+  repositoryApiUrl: string;
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    LfLoginComponent,
+    LfFieldContainerComponent,
+    LfRepositoryBrowserComponent,
+    LfToolbarComponent,
+    ReactiveFormsModule,
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent implements OnInit, AfterViewInit {
   config = config;
   signInOption = 'redirect';
-  loginPageUrl = UrlUtils.combineURLs(
-    config.REDIRECT_URI,
-    '/popup-login.html'
-  );
+  loginType = LoginType.Cloud;
+  selfHostedLoginType = LoginType.SelfHosted;
+  selfHostedRepositoryId: string = '';
+  redirectBehavior = RedirectBehavior.Replace;
+  loginPageUrl = UrlUtils.combineURLs(config.REDIRECT_URI, '/popup-login.html');
+
+  urlRegex: RegExp =
+    /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
+
+  selfHostedForm = new FormGroup({
+    repositoryName: new FormControl('', { validators: Validators.required }),
+    repositoryUrl: new FormControl('', {
+      validators: [Validators.required, Validators.pattern(this.urlRegex)],
+    }),
+    webClientUrl: new FormControl('', {
+      validators: [Validators.required, Validators.pattern(this.urlRegex)],
+    }),
+  });
 
   toolbarOptions: ToolbarOption[] = [
     {
@@ -95,7 +152,7 @@ export class AppComponent implements AfterViewInit {
       disabled: false,
       tag: {
         handler: async () => {
-          await this.lfRepositoryBrowser?.nativeElement.refreshAsync();
+          await this.lfRepositoryBrowser?.refreshAsync();
         },
       },
     },
@@ -177,11 +234,11 @@ export class AppComponent implements AfterViewInit {
 
   // the UI components
   @ViewChild('lfFieldContainerElement')
-  lfFieldContainerElement?: ElementRef<LfFieldContainerComponent>;
+  lfFieldContainerElement?: LfFieldContainerComponent;
   // loginComponent references both the redirect login component and the hidden popup login component
-  @ViewChild('loginComponent') loginComponent?: ElementRef<LfLoginComponent>;
+  @ViewChild('lfLoginComponent') loginComponent?: LfLoginComponent;
   @ViewChild('lfRepositoryBrowser')
-  lfRepositoryBrowser?: ElementRef<LfRepositoryBrowserComponent>;
+  lfRepositoryBrowser?: LfRepositoryBrowserComponent;
 
   // services needed for UI components
   lfFieldsService?: LfFieldsService;
@@ -198,7 +255,20 @@ export class AppComponent implements AfterViewInit {
   fileExtension?: string;
   entrySelected?: LfTreeNode;
 
-  constructor(private ref: ChangeDetectorRef, public dialog: MatDialog) {}
+  private ref = inject(ChangeDetectorRef);
+  dialog = inject(MatDialog);
+
+  ngOnInit(): void {
+    const selectedSignInOption = sessionStorage.getItem(
+      SELECTED_SIGN_IN_OPTION
+    );
+    if (selectedSignInOption) {
+      this.signInOption = selectedSignInOption;
+    }
+
+    this.selfHostedRepositoryId =
+      this.getSelfHostedRepositoryConfig()?.repositoryId ?? '';
+  }
 
   // Angular hook, after view is initiated
   async ngAfterViewInit(): Promise<void> {
@@ -206,10 +276,33 @@ export class AppComponent implements AfterViewInit {
     await this.initializeFieldContainerAsync();
   }
 
+  private getSelfHostedRepositoryConfig():
+    | SelfHostedRepositoryConfig
+    | undefined {
+    try {
+      const selfHostedConfigStorage =
+        sessionStorage.getItem(SELF_HOSTED_CONFIG);
+      if (selfHostedConfigStorage) {
+        return JSON.parse(
+          selfHostedConfigStorage
+        ) as SelfHostedRepositoryConfig;
+      }
+    } catch (err: any) {
+      console.warn('Unable to retrieve the Self-Hosted config' + err.message);
+    }
+    return undefined;
+  }
+
   get buttontext() {
-    return this.loginComponent?.nativeElement.state === LoginState.LoggedIn
+    return this.loginComponent?.state === LoginState.LoggedIn
       ? 'Sign Out with popup'
       : 'Sign In with popup';
+  }
+
+  get selfHostedLoginText() {
+    return this.loginComponent?.state === LoginState.LoggedIn
+      ? 'Sign Out with Self-Hosted redirect'
+      : 'Sign In with Self-Hosted redirect';
   }
 
   openLogin() {
@@ -217,7 +310,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   setColumns(columns: ColumnDef[]) {
-    this.lfRepositoryBrowser?.nativeElement.setColumnsToDisplay(columns);
+    this.lfRepositoryBrowser?.setColumnsToDisplay(columns);
     this.selectedColumns = columns;
   }
 
@@ -236,8 +329,7 @@ export class AppComponent implements AfterViewInit {
   private async getAndInitializeRepositoryClientAndServicesAsync() {
     // get accessToken from login component
     const accessToken =
-      this.loginComponent?.nativeElement?.authorization_credentials
-        ?.accessToken;
+      this.loginComponent?.authorization_credentials?.accessToken;
     if (accessToken) {
       if (!this.repoClient) {
         this.repoClient = await this.tryInitRepoClientAsync();
@@ -261,7 +353,7 @@ export class AppComponent implements AfterViewInit {
       throw new Error('Login Component is undefined');
     }
     const repoClient = await this.makeRepoClientFromLoginComponent(
-      this.loginComponent.nativeElement
+      this.loginComponent
     );
     return repoClient;
   }
@@ -269,18 +361,27 @@ export class AppComponent implements AfterViewInit {
   private async makeRepoClientFromLoginComponent(
     loginComponent: LfLoginComponent
   ): Promise<IRepositoryApiClientExInternal> {
+    const baseUrl = this.getSelfHostedRepositoryConfig()?.repositoryApiUrl;
     const partialRepoClient: IRepositoryApiClient =
       RepositoryApiClient.createFromHttpRequestHandler(
-        loginComponent.authorizationRequestHandler
+        loginComponent.authorizationRequestHandler,
+        baseUrl
       );
 
     const getCurrentRepo = async (
       repoClient: IRepositoryApiClientExInternal
     ) => {
-      const repos = await repoClient.repositoriesClient.getRepositoryList({});
-      const repo = repos ? repos[0] : undefined;
-      if (repo?.repoId && repo?.repoName) {
-        return { repoId: repo.repoId, repoName: repo.repoName };
+      const repositoryId = this.getSelfHostedRepositoryConfig()?.repositoryId;
+      if (repositoryId) {
+        return {
+          repoId: repositoryId,
+          repoName: repositoryId,
+        };
+      }
+      const repos = await repoClient.repositoriesClient.listRepositories({});
+      const repo = repos.value?.[0];
+      if (repo?.id && repo?.name) {
+        return { repoId: repo.id, repoName: repo.name };
       }
       throw new Error('Current repo id or name undefined.');
     };
@@ -317,37 +418,29 @@ export class AppComponent implements AfterViewInit {
   async initializeFieldContainerAsync() {
     this.ref.detectChanges();
     if (this.lfFieldsService) {
-      await this.lfFieldContainerElement?.nativeElement?.initAsync(
-        this.lfFieldsService
-      );
+      await this.lfFieldContainerElement?.initAsync(this.lfFieldsService);
     }
   }
 
   async initializeTreeAsync() {
     this.ref.detectChanges();
     if (this.lfRepoTreeNodeService) {
-      await this.lfRepositoryBrowser?.nativeElement.initAsync(
+      await this.lfRepositoryBrowser?.initAsync(
         this.lfRepoTreeNodeService,
         this.lfSelectedFolder?.selectedFolderPath
       );
     }
   }
 
-  isNodeSelectable = (node: LfRepoTreeNode) => {
-    if (node.entryType == EntryType.Folder) {
-      return true;
-    } else if (
-      node.entryType == EntryType.Shortcut &&
-      node.targetType == EntryType.Folder
-    ) {
-      return true;
-    } else {
-      return false;
+  isNodeSelectable = (node: LfTreeNode) => {
+    if (node.isContainer) {
+      return Promise.resolve(false);
     }
+    return Promise.resolve(true);
   };
 
   get isLoggedIn(): boolean {
-    return this.loginComponent?.nativeElement?.state === LoginState.LoggedIn;
+    return this.loginComponent?.state === LoginState.LoggedIn;
   }
 
   // Tree event handler methods
@@ -356,22 +449,21 @@ export class AppComponent implements AfterViewInit {
       !this.lfRepositoryBrowser ||
       !this.repoClient ||
       !this.loginComponent ||
-      !this.loginComponent.nativeElement.account_endpoints
+      !this.loginComponent.account_endpoints
     ) {
       throw new Error(
         'Could not set lfSelectedFolder: some of {lfRepositoryBrowser, repoClient, loginComponent, account_endpoints} were undefined'
       );
     }
-    const selectedNode = this.lfRepositoryBrowser.nativeElement
-      .currentFolder as LfRepoTreeNode;
+    const selectedNode = this.lfRepositoryBrowser
+      ?.currentFolder as LfRepoTreeNode;
     let entryId = Number.parseInt(selectedNode.id, 10);
     const selectedFolderPath = selectedNode.path;
     if (selectedNode.entryType == EntryType.Shortcut && selectedNode.targetId) {
       entryId = selectedNode.targetId;
     }
     const repoId = await this.repoClient.getCurrentRepoId();
-    const waUrl =
-      this.loginComponent.nativeElement.account_endpoints.webClientUrl;
+    const waUrl = this.loginComponent.account_endpoints.webClientUrl;
     this.expandFolderBrowser = false;
     this.lfSelectedFolder = {
       selectedNodeUrl:
@@ -387,26 +479,25 @@ export class AppComponent implements AfterViewInit {
   }
 
   get shouldShowSelect(): boolean {
-    return (
-      !this.shouldShowOpen &&
-      !!this.lfRepositoryBrowser?.nativeElement?.currentFolder
-    );
+    return !this.shouldShowOpen && !!this.lfRepositoryBrowser?.currentFolder;
   }
 
   get shouldShowOpen(): boolean {
     return !!this.entrySelected;
   }
 
-  onEntrySelected(event: Event) {
-    const customEvent = event as CustomEvent<LfTreeNode[]>;
-    const treeNodesSelected: LfTreeNode[] = customEvent.detail;
-    this.entrySelected =
-      treeNodesSelected?.length > 0 ? treeNodesSelected[0] : undefined;
+  onEntrySelected(entries: LfTreeNode[] | undefined) {
+    if (entries) {
+      const treeNodesSelected: LfTreeNode[] = entries;
+      this.entrySelected =
+        treeNodesSelected?.length > 0 ? treeNodesSelected[0] : undefined;
+    }
   }
 
-  async onToolbarOptionSelected(event: Event) {
-    const customEvent = event as CustomEvent<ToolbarOption>;
-    await customEvent.detail.tag.handler();
+  async onToolbarOptionSelected(toolbarOption: ToolbarOption) {
+    if (toolbarOption.tag) {
+      await toolbarOption.tag.handler();
+    }
   }
 
   openNewFolderDialog(): void {
@@ -427,16 +518,16 @@ export class AppComponent implements AfterViewInit {
 
   async makeNewFolder(folderName: string) {
     if (folderName) {
-      if (!this.lfRepositoryBrowser?.nativeElement?.currentFolder) {
+      if (!this.lfRepositoryBrowser?.currentFolder) {
         throw new Error(
           this.localizationService.getString('NO_CURRENTLY_OPENED_FOLDER')
         );
       }
       await this.addNewFolderAsync(
-        this.lfRepositoryBrowser?.nativeElement?.currentFolder,
+        this.lfRepositoryBrowser?.currentFolder,
         folderName
       );
-      await this.lfRepositoryBrowser?.nativeElement?.refreshAsync();
+      await this.lfRepositoryBrowser?.refreshAsync();
     } else {
       throw new Error(
         this.localizationService.getString('PLEASE_PROVIDE_FOLDER_NAME')
@@ -453,13 +544,13 @@ export class AppComponent implements AfterViewInit {
     }
     const entryId =
       (parentNode as LfRepoTreeNode).targetId ?? parseInt(parentNode.id, 10);
-    const request: PostEntryChildrenRequest = new PostEntryChildrenRequest({
+    const request: CreateEntryRequest = new CreateEntryRequest({
       name: folderName,
-      entryType: PostEntryChildrenEntryType.Folder,
+      entryType: CreateEntryRequestEntryType.Folder,
     });
-    const repoId: string = await this.repoClient.getCurrentRepoId();
-    await this.repoClient?.entriesClient.createOrCopyEntry({
-      repoId,
+    const repositoryId: string = await this.repoClient.getCurrentRepoId();
+    await this.repoClient?.entriesClient.createEntry({
+      repositoryId,
       entryId,
       request,
     });
@@ -471,7 +562,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   async onOpenNode() {
-    await this.lfRepositoryBrowser?.nativeElement?.openSelectedNodesAsync();
+    await this.lfRepositoryBrowser?.openSelectedNodesAsync();
   }
 
   async onClickBrowse() {
@@ -483,6 +574,52 @@ export class AppComponent implements AfterViewInit {
     }
     await this.initializeTreeAsync();
     this.setColumns(this.selectedColumns);
+  }
+
+  async onClickLoginSelfHosted() {
+    if (this.isLoggedIn) {
+      this.loginComponent?.startLogout();
+      // clear session storage
+      sessionStorage.clear();
+    } else {
+      const repositoryId = this.selfHostedForm.get('repositoryName')?.value;
+      const repositoryApiUrl = this.selfHostedForm.get('repositoryUrl')?.value;
+      const webClientUrl = this.selfHostedForm.get('webClientUrl')?.value;
+
+      if (repositoryId && repositoryApiUrl && webClientUrl) {
+        this.selfHostedRepositoryId = repositoryId;
+        this.ref.detectChanges();
+
+        const selfHostedRepositoryConfig: SelfHostedRepositoryConfig = {
+          repositoryId,
+          repositoryApiUrl,
+        };
+        sessionStorage.setItem(
+          SELF_HOSTED_CONFIG,
+          JSON.stringify(selfHostedRepositoryConfig)
+        );
+
+        const accountEndpoints: AccountEndpoints = {
+          oauthAuthorizeUrl: `${repositoryApiUrl}/v2/Authorize`,
+          regionalDomain: repositoryApiUrl,
+          webClientUrl: webClientUrl,
+          wsignoutUrl: `${repositoryApiUrl}/v2/Logout`,
+        };
+
+        await this.loginComponent?.initSelfHostedLoginFlowAsync(
+          accountEndpoints,
+          repositoryId
+        );
+      }
+    }
+  }
+
+  onSignInOptionChange(event: MatSelectChange) {
+    this.selfHostedForm.reset();
+    sessionStorage.clear();
+
+    this.signInOption = event.value;
+    sessionStorage.setItem(SELECTED_SIGN_IN_OPTION, event.value);
   }
 
   get selectedFolderDisplayName(): string {
@@ -565,8 +702,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   async onClickSave() {
-    const valid =
-      this.lfFieldContainerElement?.nativeElement?.forceValidation();
+    const valid = this.lfFieldContainerElement?.forceValidation();
     if (valid) {
       const fileNameWithExtension = this.fileName + '.' + this.fileExtension;
       const edocBlob: FileParameter = {
@@ -575,11 +711,10 @@ export class AppComponent implements AfterViewInit {
       };
 
       const metadataRequest = await this.createMetadataRequestAsync();
-      const entryRequest: PostEntryWithEdocMetadataRequest =
-        new PostEntryWithEdocMetadataRequest({
-          metadata: metadataRequest.metadata,
-          template: metadataRequest.template,
-        });
+      const entryRequest: ImportEntryRequest = new ImportEntryRequest({
+        name: fileNameWithExtension,
+        metadata: metadataRequest,
+      });
 
       try {
         await this.trySaveDocument(edocBlob, entryRequest);
@@ -599,7 +734,7 @@ export class AppComponent implements AfterViewInit {
 
   private async trySaveDocument(
     edocBlob: FileParameter,
-    entryRequest: PostEntryWithEdocMetadataRequest
+    entryRequest: ImportEntryRequest
   ) {
     if (!this.repoClient) {
       throw new Error('repoClient was undefined');
@@ -610,10 +745,10 @@ export class AppComponent implements AfterViewInit {
     if (!this.fileName) {
       throw new Error('fileName was undefined');
     }
-    const repoId = await this.repoClient.getCurrentRepoId();
+    const repositoryId = await this.repoClient.getCurrentRepoId();
     const currentSelectedByPathResponse =
       await this.repoClient.entriesClient.getEntryByPath({
-        repoId,
+        repositoryId,
         fullPath: this.lfSelectedFolder.selectedFolderPath,
       });
     const currentSelectedEntry = currentSelectedByPathResponse.entry;
@@ -628,61 +763,38 @@ export class AppComponent implements AfterViewInit {
     if (!parentEntryId) {
       throw new Error('parentEntryId was undefined');
     }
-    await this.repoClient.entriesClient.importDocument({
-      repoId,
-      parentEntryId,
-      fileName: this.fileName,
-      autoRename: true,
-      electronicDocument: edocBlob,
+    await this.repoClient.entriesClient.importEntry({
+      repositoryId,
+      entryId: parentEntryId,
+      file: edocBlob,
       request: entryRequest,
     });
     window.alert('Successfully saved document to Laserfiche');
   }
 
-  private async createMetadataRequestAsync(): Promise<PostEntryWithEdocMetadataRequest> {
-    const fieldValues =
-      this.lfFieldContainerElement?.nativeElement?.getFieldValues() ?? {};
+  private async createMetadataRequestAsync(): Promise<ImportEntryRequestMetadata> {
+    const fieldValues = this.lfFieldContainerElement?.getFieldValues() ?? {};
     const templateName =
-      this.lfFieldContainerElement?.nativeElement?.getTemplateValue()?.name ??
-      '';
+      this.lfFieldContainerElement?.getTemplateValue()?.name ?? '';
 
-    const formattedFieldValues:
-      | {
-          [key: string]: FieldToUpdate;
-        }
-      | undefined = {};
+    const formattedFields: FieldToUpdate[] = [];
 
     for (const key in fieldValues) {
-      const value = fieldValues[key];
-      formattedFieldValues[key] = new FieldToUpdate({
-        ...value,
-        values: (value.values ?? []).map((val) => new ValueToUpdate(val)),
-      });
+      const field = fieldValues[key];
+      formattedFields.push(
+        new FieldToUpdate({
+          name: key,
+          values: (field.values ?? []).map((val: any) => val.value as string),
+        })
+      );
     }
 
-    const requestMetadata: PostEntryWithEdocMetadataRequest =
-      this.getPostEntryRequest(templateName, formattedFieldValues);
+    const requestMetadata = new ImportEntryRequestMetadata({
+      templateName:
+        templateName && templateName.length > 0 ? templateName : undefined,
+      fields: formattedFields,
+    });
     return requestMetadata;
-  }
-
-  private getPostEntryRequest(
-    templateName: string | undefined,
-    allFields:
-      | {
-          [key: string]: FieldToUpdate;
-        }
-      | undefined
-  ): PostEntryWithEdocMetadataRequest {
-    const entryRequest: PostEntryWithEdocMetadataRequest =
-      new PostEntryWithEdocMetadataRequest({
-        metadata: new PutFieldValsRequest({
-          fields: allFields,
-        }),
-      });
-    if (templateName && templateName.length > 0) {
-      entryRequest.template = templateName;
-    }
-    return entryRequest;
   }
 
   // localization helpers

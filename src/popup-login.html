@@ -1,7 +1,7 @@
 <!--Copyright (c) Laserfiche.
 Licensed under the MIT License. See LICENSE in the project root for license information.-->
 
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <link
@@ -12,7 +12,6 @@ Licensed under the MIT License. See LICENSE in the project root for license info
       href="https://cdn.jsdelivr.net/npm/@laserfiche/lf-ui-components@18/cdn/indigo-pink.css"
       rel="stylesheet"
     />
-    <script src="https://cdn.jsdelivr.net/npm/zone.js@0.14.10/bundles/zone.umd.min.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/@laserfiche/lf-ui-components@18/cdn/lf-ui-components.js"
       defer
@@ -27,8 +26,7 @@ Licensed under the MIT License. See LICENSE in the project root for license info
       }
 
       function addLoginComponent(addRedirectQS) {
-        const loginComponent = document.createElement('lf-login');
-
+        const loginComponent = document.createElement('lf-login-component');
         loginComponent.setAttribute('redirect_uri', getDocumentUrlNoQs());
         loginComponent.setAttribute('scope', config.SCOPE);
         loginComponent.setAttribute(
@@ -36,6 +34,8 @@ Licensed under the MIT License. See LICENSE in the project root for license info
           config.HOST_NAME
         );
         loginComponent.setAttribute('client_id', config.CLIENT_ID);
+        loginComponent.setAttribute('login_type', 'Cloud');
+        loginComponent.setAttribute('login_identifier', config.CLIENT_ID);
         loginComponent.setAttribute('redirect_behavior', 'Replace');
         loginComponent.setAttribute('id', 'login-component');
         loginComponent.setAttribute('style', 'display: none');
@@ -55,7 +55,7 @@ Licensed under the MIT License. See LICENSE in the project root for license info
         } else {
           // Navigated from app
           const loginElement = addLoginComponent(false);
-          if (loginElement.state === 'LoggedOut') {
+          if (!loginElement.state || loginElement.state === 'LoggedOut') {
             // Start the login flow
             loginElement.initLoginFlowAsync();
           } else {

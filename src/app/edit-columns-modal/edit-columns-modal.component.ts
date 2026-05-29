@@ -1,7 +1,8 @@
 // Copyright (c) Laserfiche.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-import { Component, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { LfLocalizationService } from '@laserfiche/lf-js-utils';
 import { ColumnDef } from '@laserfiche/lf-ui-components/lf-selection-list';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -35,6 +36,8 @@ interface EditColumnsDialogData {
   selector: 'app-edit-columns-modal',
   templateUrl: './edit-columns-modal.component.html',
   styleUrls: ['./edit-columns-modal.component.css'],
+  standalone: true,
+  imports: [CommonModule],
 })
 export class EditColumnsModalComponent {
   localizationService: LfLocalizationService = new LfLocalizationService(
@@ -45,10 +48,8 @@ export class EditColumnsModalComponent {
   CANCEL = this.localizationService.getString('CANCEL');
   ADD_REMOVE_COLUMNS = this.localizationService.getString('ADD_REMOVE_COLUMNS');
 
-  constructor(
-    public dialogRef: MatDialogRef<EditColumnsModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: EditColumnsDialogData
-  ) {}
+  dialogRef = inject<MatDialogRef<EditColumnsModalComponent>>(MatDialogRef);
+  data = inject<EditColumnsDialogData>(MAT_DIALOG_DATA);
 
   async closeDialog(columns?: ColumnDef[]) {
     if (columns) {

@@ -18,10 +18,12 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v4
+      - name: Setup Node 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
 
       - name: Npm ci
         run: npm ci
@@ -36,7 +38,7 @@ jobs:
         run: tar -czvf ./veracode/lf-sample-OAuth-SPA-angular-npm.tar.gz ./dist
 
       - name: Veracode Upload And Scan (Static Application Security Testing)
-        uses: veracode/veracode-uploadandscan-action@0.2.10
+        uses: veracode/veracode-uploadandscan-action@0.2.11
         with:
           appname: 'lf-sample-OAuth-SPA-angular-npm'
           createprofile: true

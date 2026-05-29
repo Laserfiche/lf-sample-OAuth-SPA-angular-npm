@@ -5,7 +5,7 @@ Licensed under the MIT License. See LICENSE in the project root for license info
   <div
     class="new-folder-dialog-modal-content"
     id="new-folder-dialog-content"
-  >
+    >
     <div class="new-folder-dialog-modal-title">
       <span class="lf-dialog-title lf-popup-dialog-title">{{
         NEW_FOLDER
@@ -14,35 +14,37 @@ Licensed under the MIT License. See LICENSE in the project root for license info
         class="lf-close-button"
         id="new-folder-dialog-modal-close-dialog"
         (click)="closeDialog()"
-      >
+        >
         <span id="new-folder-dialog-close-icon" class="material-icons"
           >close</span
-        >
-      </button>
+          >
+        </button>
+      </div>
+      <div class="lf-dialog-message">
+        @if (errorMessage) {
+          <p class="popup-error">{{ errorMessage }}</p>
+        }
+        <p class="new-folder-label">{{ NAME }}</p>
+        <input
+          id="new-folder-name-input"
+          class="new-folder-name-input"
+          [(ngModel)]="folderName"
+          />
+        </div>
+        <div class="lf-dialog-actions">
+          <button
+            (click)="closeDialog(folderName)"
+            [disabled]="folderName ? folderName.length === 0 : true"
+            class="lf-button primary-button"
+            >
+            {{ OK }}
+          </button>
+          <button
+            (click)="closeDialog()"
+            class="lf-button sec-button margin-left-button"
+            >
+            {{ CANCEL }}
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="lf-dialog-message">
-      <p *ngIf="errorMessage" class="popup-error">{{ errorMessage }}</p>
-      <p class="new-folder-label">{{ NAME }}</p>
-      <input
-        id="new-folder-name-input"
-        class="new-folder-name-input"
-        [(ngModel)]="folderName"
-      />
-    </div>
-    <div class="lf-dialog-actions">
-      <button
-        (click)="closeDialog(folderName)"
-        [disabled]="folderName ? folderName.length === 0 : true"
-        class="lf-button primary-button"
-      >
-        {{ OK }}
-      </button>
-      <button
-        (click)="closeDialog()"
-        class="lf-button sec-button margin-left-button"
-      >
-        {{ CANCEL }}
-      </button>
-    </div>
-  </div>
-</div>

@@ -1,7 +1,9 @@
 // Copyright (c) Laserfiche.
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-import { Component, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { LfLocalizationService } from '@laserfiche/lf-js-utils';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
@@ -34,6 +36,8 @@ interface NewFolderDialogData {
   selector: 'app-new-folder-modal',
   templateUrl: './new-folder-modal.component.html',
   styleUrls: ['./new-folder-modal.component.css'],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
 })
 export class NewFolderModalComponent {
   localizationService: LfLocalizationService = new LfLocalizationService(
@@ -48,10 +52,8 @@ export class NewFolderModalComponent {
   errorMessage?: string;
   folderName?: string;
 
-  constructor(
-    public dialogRef: MatDialogRef<NewFolderModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: NewFolderDialogData
-  ) {}
+  dialogRef = inject<MatDialogRef<NewFolderModalComponent>>(MatDialogRef);
+  data = inject<NewFolderDialogData>(MAT_DIALOG_DATA);
 
   async closeDialog(folder?: string) {
     if (!folder) {

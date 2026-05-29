@@ -1,7 +1,8 @@
 {
-    "recommendations": [
-        "davidanson.vscode-markdownlint",
-        "angular.ng-template", 
-        "epivision.vscode-file-header"
-    ]
+  "recommendations": [
+    "davidanson.vscode-markdownlint",
+    "angular.ng-template",
+    "epivision.vscode-file-header",
+    "esbenp.prettier-vscode"
+  ]
 }
